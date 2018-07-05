@@ -64,7 +64,7 @@ class MainWindow(Gtk.Window):
         win.show_all()
 
     def question_settings(self, widget):
-        print("settings")
+        print("settings to be added")
 
 
     def update_selected(self, new_selected):
