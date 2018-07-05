@@ -1,18 +1,16 @@
 import sys
 import gi
-
+from threading import Thread, Event
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 gi.require_version('GdkX11', '3.0')
 from gi.repository import GdkX11
-
 import vlc
-
-#MRL = ""
 
 
 class PlayerWindow(Gtk.Window):
+
 
     def __init__(self, mrl):
         Gtk.Window.__init__(self, title="Python-Vlc Media Player")
@@ -20,6 +18,8 @@ class PlayerWindow(Gtk.Window):
         self.is_player_active = False
         self.connect("destroy", Gtk.main_quit)
         self.MRL = mrl
+        self.position_list =list()
+
 
     def show(self):
         self.show_all()
@@ -56,7 +56,7 @@ class PlayerWindow(Gtk.Window):
         self.slider.set_digits(0)
         self.slider.set_hexpand(True)
         self.slider.set_valign(Gtk.Align.START)
-        self.slider.connect("value-changed", self.slider_moved)
+        #self.slider.connect("value-changed", self.slider_moved)
 
         #QUESTION
         self.question_label = Gtk.Label("this is the question?")
@@ -86,13 +86,14 @@ class PlayerWindow(Gtk.Window):
         self.vbox.pack_start(self.hbox, False, False, 0)
         self.vbox.pack_start(self.sliderbox, False, False, 0)
         self.vbox.pack_start(self.questionbox, False, False, 0)
+
+
     def stop_player(self, widget, data=None):
         self.player.stop()
         self.is_player_active = False
         self.playback_button.set_image(self.play_image)
 
     def toggle_player_playback(self, widget, data=None):
-
         if self.is_player_active == False and self.player_paused == False:
             self.player.play()
             self.playback_button.set_image(self.pause_image)
@@ -110,6 +111,7 @@ class PlayerWindow(Gtk.Window):
         else:
             pass
 
+
     def _realized(self, widget, data=None):
         self.vlcInstance = vlc.Instance("--no-xlib")
         self.player = self.vlcInstance.media_player_new()
@@ -120,14 +122,19 @@ class PlayerWindow(Gtk.Window):
         self.playback_button.set_image(self.pause_image)
         self.is_player_active = True
 
+        #Schedule
+        stopFlag = Event()
+        thread = MyThread(stopFlag, self)
+        thread.start()
+        # this will stop the timer
+        #stopFlag.set()
 
-    def slider_moved(self, event):
-        media = self.player.get_media()
-        print media.get_state()
-        print media.get_stats()
-        #self.question_label.set_text(str(int(self.slider.get_value())))
-        #print("slider moved")
 
+    def record_slider(self, time):
+        self.position_list[time+1] = int(self.slider.get_value())
+
+    def print_list(self):
+        print self.position_list
 
 if __name__ == '__main__':
     if not sys.argv[1:]:
@@ -141,3 +148,27 @@ if __name__ == '__main__':
         Gtk.main()
         window.player.stop()
         window.vlcInstance.release()
+
+
+class MyThread(Thread):
+    def __init__(self, event, window):
+        Thread.__init__(self)
+        self.stopped = event
+        self.window = window
+        self.offset = 0
+        self.highest = 0
+
+    def run(self):
+        while not self.stopped.wait(0.1):
+            time = self.offset+int(self.window.player.get_position() * self.window.player.get_length() / 100)
+            print time
+            if(self.highest <= time):
+                self.window.position_list.append(int(self.window.slider.get_value()))
+                self.highest = time+1
+
+            self.offset = (self.offset+1)%4
+
+
+            if time % 100 == 0:
+                print self.window.position_list
+            # call a function
