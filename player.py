@@ -8,6 +8,7 @@ gi.require_version('GdkX11', '3.0')
 from gi.repository import GdkX11
 import vlc
 
+import datetime
 
 class PlayerWindow(Gtk.Window):
 
@@ -19,6 +20,7 @@ class PlayerWindow(Gtk.Window):
         self.connect("destroy", Gtk.main_quit)
         self.MRL = mrl
         self.position_list =list()
+        self.offset = 0
 
 
     def show(self):
@@ -93,6 +95,7 @@ class PlayerWindow(Gtk.Window):
         self.is_player_active = False
         self.playback_button.set_image(self.play_image)
 
+
     def toggle_player_playback(self, widget, data=None):
         if self.is_player_active == False and self.player_paused == False:
             self.player.play()
@@ -103,11 +106,14 @@ class PlayerWindow(Gtk.Window):
             self.player.play()
             self.playback_button.set_image(self.pause_image)
             self.player_paused = False
+            print "starting player"
+            self.create_thread()
 
         elif self.is_player_active == True and self.player_paused == False:
             self.player.pause()
             self.playback_button.set_image(self.play_image)
             self.player_paused = True
+            self.stop_thread()
         else:
             pass
 
@@ -123,15 +129,23 @@ class PlayerWindow(Gtk.Window):
         self.is_player_active = True
 
         #Schedule
-        stopFlag = Event()
-        thread = MyThread(stopFlag, self)
-        thread.start()
-        # this will stop the timer
-        #stopFlag.set()
+        self.create_thread()
+
 
 
     def record_slider(self, time):
         self.position_list[time+1] = int(self.slider.get_value())
+
+    def create_thread(self):
+        print "starting thread"
+        self.stopFlag = Event()
+        self.thread = MyThread(self.stopFlag, self, datetime.datetime.now(), self.offset)
+        self.thread.start()
+
+    def stop_thread(self):
+        self.offset = self.thread.last_index
+        self.stopFlag.set()
+        print "stopping thread at " + str(self.offset)
 
     def print_list(self):
         print self.position_list
@@ -151,24 +165,34 @@ if __name__ == '__main__':
 
 
 class MyThread(Thread):
-    def __init__(self, event, window):
+    def __init__(self, event, window, time, offset):
         Thread.__init__(self)
         self.stopped = event
         self.window = window
-        self.offset = 0
-        self.highest = 0
+        self.offset = offset
+        self.begin_time = time
+        self.last_index = 0
 
     def run(self):
         while not self.stopped.wait(0.1):
-            time = self.offset+int(self.window.player.get_position() * self.window.player.get_length() / 100)
-            print time
-            if(self.highest <= time):
+            time = datetime.datetime.now() - self.begin_time
+            fixed_time = round((time.microseconds/1000000.0 + time.seconds)*10.0) + self.offset
+
+
+            if(not self.last_index == fixed_time or fixed_time == 0):
+                print fixed_time
+                self.last_index = fixed_time
                 self.window.position_list.append(int(self.window.slider.get_value()))
-                self.highest = time+1
-
-            self.offset = (self.offset+1)%4
 
 
-            if time % 100 == 0:
-                print self.window.position_list
+
+            #if(self.next_time == time):
+            #    self.window.position_list.append(int(self.window.slider.get_value()))
+            #    self.next_time = time+1
+
+           # self.offset = (self.offset+1)%4
+
+
+            #if time % 100 == 0:
+            #    print self.window.position_list
             # call a function

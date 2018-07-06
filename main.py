@@ -5,31 +5,26 @@ import select_file
 import player
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
-
 gi.require_version('GdkX11', '3.0')
 
 
 class MainWindow(Gtk.Window):
 
     def __init__(self):
-        Gtk.Window.__init__(self, title="Python-Vlc Media Player")
-
+        Gtk.Window.__init__(self, title="Dynamic State Tracker")
         self.selected_file = None
+
+        self.draw_area = Gtk.DrawingArea()
+        self.draw_area.set_size_request(300, 100)
 
         self.start_button = Gtk.Button("        Start        ")
         self.start_button.connect("clicked", self.start)
 
-
         self.select_video_button = Gtk.Button("Select video")
         self.select_video_button.connect("clicked", self.select_video)
 
-
         self.question_settings_button = Gtk.Button("Set questions")
         self.question_settings_button.connect("clicked", self.question_settings)
-
-
-        self.draw_area = Gtk.DrawingArea()
-        self.draw_area.set_size_request(300, 100)
 
         self.hbox = Gtk.Box(spacing=6)
         self.hbox.pack_start(self.start_button, True, True, 0)
