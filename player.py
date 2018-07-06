@@ -1,14 +1,17 @@
 import sys
 import gi
-from threading import Thread, Event
+
+
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import GLib, Gtk, GObject
+
 
 gi.require_version('GdkX11', '3.0')
 from gi.repository import GdkX11
 import vlc
-
 import datetime
+
+import save_input
 
 class PlayerWindow(Gtk.Window):
 
@@ -20,15 +23,22 @@ class PlayerWindow(Gtk.Window):
         self.connect("destroy", Gtk.main_quit)
         self.MRL = mrl
         self.position_list =list()
+
+
+
+
+        #Recording Variables
+        self.next_position = 1
+        self.begin_time =  datetime.datetime.now()
         self.offset = 0
 
+
+        #GObject.timeout_add(100, self.print_list)
 
     def show(self):
         self.show_all()
 
     def setup_objects_and_events(self):
-
-
         # BUTTONS
         self.playback_button = Gtk.Button()
         self.stop_button = Gtk.Button()
@@ -107,13 +117,12 @@ class PlayerWindow(Gtk.Window):
             self.playback_button.set_image(self.pause_image)
             self.player_paused = False
             print "starting player"
-            self.create_thread()
+            self.record_slider()
 
         elif self.is_player_active == True and self.player_paused == False:
             self.player.pause()
             self.playback_button.set_image(self.play_image)
             self.player_paused = True
-            self.stop_thread()
         else:
             pass
 
@@ -129,26 +138,32 @@ class PlayerWindow(Gtk.Window):
         self.is_player_active = True
 
         #Schedule
-        self.create_thread()
+        self.record_slider()
+        print "video has began"
+
+    def record_slider(self):
+        if(str(self.player.get_state()) == "State.Paused"):
+            self.offset = self.next_position
+            pass
+        elif(str(self.player.get_state()) == "State.Playing"):
+            self.position_list.append(int(self.slider.get_value()))
+            GObject.timeout_add(100, self.record_slider)
+            print str(int(self.slider.get_value()))
+        elif(str(self.player.get_state()) == "State.Ended"):
+            self.save_list()
+        else:
+            GObject.timeout_add(100, self.record_slider)
 
 
 
-    def record_slider(self, time):
-        self.position_list[time+1] = int(self.slider.get_value())
-
-    def create_thread(self):
-        print "starting thread"
-        self.stopFlag = Event()
-        self.thread = MyThread(self.stopFlag, self, datetime.datetime.now(), self.offset)
-        self.thread.start()
-
-    def stop_thread(self):
-        self.offset = self.thread.last_index
-        self.stopFlag.set()
-        print "stopping thread at " + str(self.offset)
 
     def print_list(self):
         print self.position_list
+
+    def save_list(self):
+        save_input.save_input(self, self.position_list)
+
+
 
 if __name__ == '__main__':
     if not sys.argv[1:]:
@@ -163,36 +178,3 @@ if __name__ == '__main__':
         window.player.stop()
         window.vlcInstance.release()
 
-
-class MyThread(Thread):
-    def __init__(self, event, window, time, offset):
-        Thread.__init__(self)
-        self.stopped = event
-        self.window = window
-        self.offset = offset
-        self.begin_time = time
-        self.last_index = 0
-
-    def run(self):
-        while not self.stopped.wait(0.1):
-            time = datetime.datetime.now() - self.begin_time
-            fixed_time = round((time.microseconds/1000000.0 + time.seconds)*10.0) + self.offset
-
-
-            if(not self.last_index == fixed_time or fixed_time == 0):
-                print fixed_time
-                self.last_index = fixed_time
-                self.window.position_list.append(int(self.window.slider.get_value()))
-
-
-
-            #if(self.next_time == time):
-            #    self.window.position_list.append(int(self.window.slider.get_value()))
-            #    self.next_time = time+1
-
-           # self.offset = (self.offset+1)%4
-
-
-            #if time % 100 == 0:
-            #    print self.window.position_list
-            # call a function
