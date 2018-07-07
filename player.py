@@ -17,17 +17,22 @@ class PlayerWindow(Gtk.Window):
 
 
     def __init__(self, mrl):
+        # Create player window
         Gtk.Window.__init__(self, title="Python-Vlc Media Player")
+        self.connect("destroy", self.exit_window)
+
+        # Initalise player variables
         self.player_paused = False
         self.is_player_active = False
-        self.connect("destroy", Gtk.main_quit)
         self.MRL = mrl
-        self.position_list =list()
+
 
 
 
 
         #Recording Variables
+
+        self.position_list = list()
         self.next_position = 1
         self.begin_time =  datetime.datetime.now()
         self.offset = 0
@@ -100,6 +105,7 @@ class PlayerWindow(Gtk.Window):
         self.vbox.pack_start(self.questionbox, False, False, 0)
 
 
+    # This may do nothing, unsure as of yet.
     def stop_player(self, widget, data=None):
         self.player.stop()
         self.is_player_active = False
@@ -116,6 +122,8 @@ class PlayerWindow(Gtk.Window):
             self.player.play()
             self.playback_button.set_image(self.pause_image)
             self.player_paused = False
+
+            # This restarts the recording after a pause.
             print "starting player"
             self.record_slider()
 
@@ -137,11 +145,13 @@ class PlayerWindow(Gtk.Window):
         self.playback_button.set_image(self.pause_image)
         self.is_player_active = True
 
-        #Schedule
+        # This begins the recording of the slider.
         self.record_slider()
-        print "video has began"
+        print "video has begun"
 
     def record_slider(self):
+        # This function is called every 100ms if the video state is playing.
+        # This function records the value of the slider at each tick, or initiates the saving process if the video has ended.
         if(str(self.player.get_state()) == "State.Paused"):
             self.offset = self.next_position
             pass
@@ -156,25 +166,18 @@ class PlayerWindow(Gtk.Window):
 
 
 
-
+    # This is for testing purposes only!
     def print_list(self):
         print self.position_list
 
+    # This is the link between the player and the saving library.
     def save_list(self):
         save_input.save_input(self, self.position_list)
 
-
-
-if __name__ == '__main__':
-    if not sys.argv[1:]:
-        print "Exiting \nMust provide the MRL."
-        sys.exit(1)
-    if len(sys.argv[1:]) == 1:
-        MRL = sys.argv[1]
-        window = PlayerWindow()
-        window.setup_objects_and_events()
-        window.show()
-        Gtk.main()
+    # This is called to released the player when the player exits the window.
+    def exit_window(self):
         window.player.stop()
         window.vlcInstance.release()
+
+
 
