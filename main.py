@@ -4,6 +4,7 @@ import player
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 gi.require_version('GdkX11', '3.0')
+import question
 
 class MainWindow(Gtk.Window):
     def __init__(self):
@@ -47,12 +48,26 @@ class MainWindow(Gtk.Window):
             print("Failed: No file selected")
         else:
             print("Opening " + self.selected_file)
-            window = player.PlayerWindow(self.selected_file)
+
+
+            # Temp to keep this from crashing without input!
+            questions = list()
+            first_question = question.Question()
+            first_question.question = "How confident were you?"
+            first_question.type = "slider"
+            questions.append(first_question)
+            #####################
+
+            window = player.PlayerWindow(self.selected_file, questions, 300)
             window.setup_objects_and_events()
             window.show()
 
     def select_video(self, widget):
         print("Selecting video")
+
+
+
+
         win = select_file.FileChooserWindow(self)
         win.show_all()
 
