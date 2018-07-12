@@ -38,10 +38,6 @@ class PlayerWindow(Gtk.Window):
         self.offset = 0
 
 
-
-
-        #GObject.timeout_add(100, self.print_list)
-
     def show(self):
         self.show_all()
 
@@ -172,7 +168,6 @@ class PlayerWindow(Gtk.Window):
         # This function is called every 100ms if the video state is playing.
         # This function records the value of the slider at each tick, or initiates the saving process if the video has ended.
         if(str(self.player.get_state()) == "State.Paused"):
-            self.offset = self.next_position
             pass
         elif(str(self.player.get_state()) == "State.Playing"):
             self.position_list.append(int(self.slider.get_value()))
@@ -184,15 +179,26 @@ class PlayerWindow(Gtk.Window):
             GObject.timeout_add(self.tick, self.record_slider)
 
     def record_questions(self):
-        print("Here we will add an input window for all the questions in self.questions")
-        self.pause_player()
-        self.question_window = QuestionWindow(self, self.questions)
+        if (str(self.player.get_state()) == "State.Paused"):
+            pass
+        elif (str(self.player.get_state()) == "State.Playing"):
+            print("Here we will add an input window for all the questions in self.questions")
+            self.player.pause()
+            self.player_paused = True
+            self.question_window = QuestionWindow(self, self.questions)
+        elif (str(self.player.get_state()) == "State.Ended"):
+            #self.save_list()
+            pass
+        else:
+            GObject.timeout_add(100, self.record_questions)
 
 
 
+
+    def restart_record(self):
+        self.player.play()
+        self.player_paused = False
         GObject.timeout_add(self.tick, self.record_questions)
-
-
 
     # This is for testing purposes only!
     def print_list(self):
@@ -214,6 +220,8 @@ class PlayerWindow(Gtk.Window):
 class QuestionWindow(Gtk.Window):
     def __init__(self, parent, questions):
         Gtk.Window.__init__(self, title="Python-Vlc Media Player")
+
+
         self.parent = parent
         self.questions = questions
         self.inputs = list()
@@ -230,12 +238,25 @@ class QuestionWindow(Gtk.Window):
                 self.inputs[i].set_hexpand(True)
                 self.inputs[i].set_valign(Gtk.Align.START)
 
-
-
                 self.question_texts.append(Gtk.Label(self.questions[i].question))
 
-                subbox.pack_start(self.inputs[i], True, True, 0)
-                subbox.pack_start(self.question_texts[i], True, True, 0)
+                subbox.pack_start(self.inputs[i], False, False, 0)
+                subbox.pack_start(self.question_texts[i], False, False, 0)
                 self.mainbox.add(subbox)
+
+
+
+        self.submit_button = Gtk.Button("Continue")
+        self.submit_button.connect("clicked", self.submit)
+        self.mainbox.add(self.submit_button)
+
+
+
         self.add(self.mainbox)
         self.show_all()
+
+
+    def submit(self, event):
+        self.parent.restart_record()
+        self.destroy()
+        print("reaches here")
