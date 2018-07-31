@@ -3,7 +3,7 @@ import json
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
-def save_input(parent, list):
+def save_input(parent, questions):
     # This is the pop up requesting input
     dialogWindow = Gtk.MessageDialog(parent,
                                      Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
@@ -21,14 +21,24 @@ def save_input(parent, list):
     text = userEntry.get_text()
     dialogWindow.destroy()
 
+    f = open("saves/" + text + ".txt", "w+")
 
     # Format data (Simple now but will become more complex)
-    save_string = format_save(list)
+    for i in range(0, len(questions)):
+        save_string = format_save(questions[i])
+        f.write(save_string)
+        f.write("//\n")
 
     # Create, write to and then close file. (Should be using try statement here!)
-    f = open("saves/" + text+".txt", "w+")
-    f.write(save_string)
+
+
     f.close()
 
-def format_save(list):
-    return json.dumps(list)  # Is there a safer way than json.dumps()?
+def format_save(question):
+
+    name = question.get_question()
+    data = json.dumps(question.get_data())
+
+    return_value = name + " - " + data
+
+    return return_value

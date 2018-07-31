@@ -88,6 +88,12 @@ class PlayerWindow(Gtk.Window):
 
         # If slider bar is active this is called.
         if (len(self.questions) == 1 and self.tick == 100):
+
+
+            # QUESTION
+            self.question_label = Gtk.Label(self.questions[0].question)
+
+
             # SLIDER
             ad1 = Gtk.Adjustment(0, 0, 100, 5, 10, 0)
             self.slider = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL, adjustment=ad1)
@@ -100,15 +106,13 @@ class PlayerWindow(Gtk.Window):
             self.sliderbox.pack_start(self.slider, True, True, 0)
 
 
-            # QUESTION
-            self.question_label = Gtk.Label(self.questions[0].question)
-
 
             self.questionbox = Gtk.Box()
             self.questionbox.pack_start(self.question_label, True, True, 0)
 
-            self.vbox.pack_start(self.sliderbox, False, False, 0)
             self.vbox.pack_start(self.questionbox, False, False, 0)
+            self.vbox.pack_start(self.sliderbox, False, False, 0)
+
 
 
 
@@ -170,11 +174,11 @@ class PlayerWindow(Gtk.Window):
         if(str(self.player.get_state()) == "State.Paused"):
             pass
         elif(str(self.player.get_state()) == "State.Playing"):
-            self.position_list.append(int(self.slider.get_value()))
+            self.questions[0].add_data(int(self.slider.get_value()))
             GObject.timeout_add(self.tick, self.record_slider)
             print str(int(self.slider.get_value()))
         elif(str(self.player.get_state()) == "State.Ended"):
-            self.save_list()
+            save_input.save_input(self, self.questions)
         else:
             GObject.timeout_add(self.tick, self.record_slider)
 
@@ -187,7 +191,7 @@ class PlayerWindow(Gtk.Window):
             self.player_paused = True
             self.question_window = QuestionWindow(self, self.questions)
         elif (str(self.player.get_state()) == "State.Ended"):
-            #self.save_list()
+            save_input.save_input(self, self.questions)
             pass
         else:
             GObject.timeout_add(100, self.record_questions)
@@ -198,6 +202,9 @@ class PlayerWindow(Gtk.Window):
     def restart_record(self):
         self.player.play()
         self.player_paused = False
+
+
+
         GObject.timeout_add(self.tick, self.record_questions)
 
     # This is for testing purposes only!
@@ -221,27 +228,34 @@ class QuestionWindow(Gtk.Window):
     def __init__(self, parent, questions):
         Gtk.Window.__init__(self, title="Python-Vlc Media Player")
 
+        self.draw_area = Gtk.DrawingArea()
+        self.draw_area.set_size_request(300, 100)
+
 
         self.parent = parent
         self.questions = questions
         self.inputs = list()
         self.question_texts = list()
-        self.mainbox = Gtk.Box()
+        self.mainbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         i = None
         for i in range(0, len(self.questions)):
             if(self.questions[i].type == "slider"):
-                subbox = Gtk.Box()
 
+                subbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
                 ad1 = Gtk.Adjustment(0, 0, 100, 5, 10, 0)
                 self.inputs.append(Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL, adjustment=ad1))
                 self.inputs[i].set_digits(0)
                 self.inputs[i].set_hexpand(True)
                 self.inputs[i].set_valign(Gtk.Align.START)
 
+                last_value = self.questions[i].last_value()
+                if not last_value is None:
+                    self.inputs[i].set_value(last_value)
                 self.question_texts.append(Gtk.Label(self.questions[i].question))
 
+                subbox.pack_start(self.question_texts[i], True, True, 0)
                 subbox.pack_start(self.inputs[i], False, False, 0)
-                subbox.pack_start(self.question_texts[i], False, False, 0)
+
                 self.mainbox.add(subbox)
 
 
@@ -257,6 +271,9 @@ class QuestionWindow(Gtk.Window):
 
 
     def submit(self, event):
+        for i in range(0, len(self.questions)):
+            self.questions[i].add_data(self.inputs[i].get_value())
+
         self.parent.restart_record()
         self.destroy()
         print("reaches here")

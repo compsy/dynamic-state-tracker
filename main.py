@@ -57,13 +57,13 @@ class MainWindow(Gtk.Window):
             first_question.type = "slider"
             questions.append(first_question)
 
-            second_question = question.Question()
-            second_question.question = "How scared were you?"
-            second_question.type = "slider"
-            questions.append(second_question)
+           # second_question = question.Question()
+            #second_question.question = "How scared were you?"
+           # second_question.type = "slider"
+            #questions.append(second_question)
             #####################
 
-            window = player.PlayerWindow(self.selected_file, questions, 1000)
+            window = player.PlayerWindow(self.selected_file, questions, 100)
             window.setup_objects_and_events()
             window.show()
 
