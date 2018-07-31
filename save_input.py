@@ -3,7 +3,7 @@ import json
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
-def save_input(parent, questions):
+def save_input(parent, vid_dir, questions, time_interval):
     # This is the pop up requesting input
     dialogWindow = Gtk.MessageDialog(parent,
                                      Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
@@ -23,11 +23,16 @@ def save_input(parent, questions):
 
     f = open("saves/" + text + ".txt", "w+")
 
+    f.write(vid_dir)
+    f.write("//")
+
+    f.write(str(time_interval))
+    f.write("//")
     # Format data (Simple now but will become more complex)
     for i in range(0, len(questions)):
         save_string = format_save(questions[i])
         f.write(save_string)
-        f.write("//\n")
+        f.write("//")
 
     # Create, write to and then close file. (Should be using try statement here!)
 

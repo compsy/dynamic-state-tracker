@@ -54,37 +54,14 @@ class SettingsWindow(Gtk.Window):#
         self.show_all()
 
 
-    def add_current_questions(self, cur_questions):
-        for i in range(0, len(cur_questions)):
-            print("(" + str(i) + ") Loading question : " + cur_questions[i].get_question())
-
-
-            new_box = Gtk.Box()
-            static_text = Gtk.Label("Question " + str(self.number_of_questions + 1))
-            question_title = Gtk.Entry()
-            question_title.set_text(cur_questions[i].get_question())
-            new_box.add(static_text)
-            new_box.add(question_title)
-
-            self.question_box.add(new_box)
-
-            self.question_fields.append(new_box)
-            self.question_names.append(question_title)
-
-            self.number_of_questions += 1
-            self.show_all()
-
-        print(" -------------------- ")
-
-
-    def plus_clicked(self, widget):
-
+    def generic_add_question(self, title = None):
         new_box = Gtk.Box()
-        static_text = Gtk.Label("Question " + str(self.number_of_questions+1))
+        static_text = Gtk.Label("Question " + str(self.number_of_questions + 1))
         question_title = Gtk.Entry()
+        question_title.set_width_chars(31)
+        question_title.set_text(title)
         new_box.add(static_text)
         new_box.add(question_title)
-
 
         self.question_box.add(new_box)
 
@@ -94,6 +71,15 @@ class SettingsWindow(Gtk.Window):#
         self.number_of_questions += 1
         self.show_all()
 
+    def add_current_questions(self, cur_questions):
+        for i in range(0, len(cur_questions)):
+            print("(" + str(i) + ") Loading question : " + cur_questions[i].get_question())
+            self.generic_add_question(cur_questions[i].get_question())
+        print(" -------------------- ")
+
+
+    def plus_clicked(self, widget):
+        self.generic_add_question("Add your question here....")
 
     def minus_clicked(self, widget):
         if(len(self.question_fields) > 0):

@@ -4,7 +4,8 @@ from gi.repository import Gtk
 
 class FileChooserWindow(Gtk.Window):
 
-    def __init__(self, parent):
+    def __init__(self, parent, type):
+        self.type = type
         self.parent = parent
         Gtk.Window.__init__(self, title="FileChooser")
         box = Gtk.Box(spacing=6)
@@ -17,7 +18,7 @@ class FileChooserWindow(Gtk.Window):
         button2 = Gtk.Button("Choose Folder")
         button2.connect("clicked", self.on_folder_clicked)
         box.add(button2)
-
+        self.show_all()
     def on_file_clicked(self, widget):
         dialog = Gtk.FileChooserDialog("Please choose a file", self,
             Gtk.FileChooserAction.OPEN,
@@ -30,8 +31,9 @@ class FileChooserWindow(Gtk.Window):
         if response == Gtk.ResponseType.OK:
             print("Open clicked")
             print("File selected: " + dialog.get_filename())
-            self.parent.update_selected(dialog.get_filename())
-            #self.parent.selected_file =
+            self.parent.update_selected(self.type, dialog.get_filename())
+
+
             dialog.destroy()
             self.destroy()
         elif response == Gtk.ResponseType.CANCEL:

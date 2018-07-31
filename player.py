@@ -178,7 +178,7 @@ class PlayerWindow(Gtk.Window):
             GObject.timeout_add(self.tick, self.record_slider)
             print str(int(self.slider.get_value()))
         elif(str(self.player.get_state()) == "State.Ended"):
-            save_input.save_input(self, self.questions)
+            save_input.save_input(self, self.MRL, self.questions, self.tick)
         else:
             GObject.timeout_add(self.tick, self.record_slider)
 
@@ -186,12 +186,11 @@ class PlayerWindow(Gtk.Window):
         if (str(self.player.get_state()) == "State.Paused"):
             pass
         elif (str(self.player.get_state()) == "State.Playing"):
-            print("Here we will add an input window for all the questions in self.questions")
             self.player.pause()
             self.player_paused = True
             self.question_window = QuestionWindow(self, self.questions)
         elif (str(self.player.get_state()) == "State.Ended"):
-            save_input.save_input(self, self.questions)
+            save_input.save_input(self, self.MRL, self.questions, self.tick)
             pass
         else:
             GObject.timeout_add(100, self.record_questions)
@@ -227,9 +226,6 @@ class PlayerWindow(Gtk.Window):
 class QuestionWindow(Gtk.Window):
     def __init__(self, parent, questions):
         Gtk.Window.__init__(self, title="Python-Vlc Media Player")
-
-
-
         self.parent = parent
         self.questions = questions
         self.inputs = list()
@@ -263,9 +259,6 @@ class QuestionWindow(Gtk.Window):
         self.mainbox.add(self.submit_button)
 
 
-
-
-
         self.add(self.mainbox)
         self.show_all()
 
@@ -276,4 +269,3 @@ class QuestionWindow(Gtk.Window):
 
         self.parent.restart_record()
         self.destroy()
-        print("reaches here")
