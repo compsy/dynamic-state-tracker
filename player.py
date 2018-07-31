@@ -228,8 +228,6 @@ class QuestionWindow(Gtk.Window):
     def __init__(self, parent, questions):
         Gtk.Window.__init__(self, title="Python-Vlc Media Player")
 
-        self.draw_area = Gtk.DrawingArea()
-        self.draw_area.set_size_request(300, 100)
 
 
         self.parent = parent
@@ -263,6 +261,8 @@ class QuestionWindow(Gtk.Window):
         self.submit_button = Gtk.Button("Continue")
         self.submit_button.connect("clicked", self.submit)
         self.mainbox.add(self.submit_button)
+
+
 
 
 
