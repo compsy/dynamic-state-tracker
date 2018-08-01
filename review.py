@@ -15,7 +15,7 @@ import statistics
 from matplotlib.backends.backend_gtk3agg import (
     FigureCanvasGTK3Agg as FigureCanvas)
 from matplotlib.figure import Figure
-
+import numpy as np
 class ReviewWindow(Gtk.Window):#
 
 
@@ -63,7 +63,8 @@ class ReviewWindow(Gtk.Window):#
         name_store.append([2, "Median"])
         name_store.append([3, "Range"])
         name_store.append([4, "Graph"])
-
+        name_store.append([5, "Best fit(1D)"])
+        name_store.append([6, "Best fit(2D)"])
         method_combo = Gtk.ComboBox.new_with_model_and_entry(name_store)
         method_combo.set_entry_text_column(1)
         method_combo.connect("changed", self.update_method)
@@ -88,17 +89,14 @@ class ReviewWindow(Gtk.Window):#
     def load_from_file(self, dir):
         file = open(dir, "r")
 
-
         whole_file_string = file.read()
         segments = whole_file_string.split("//")
-        print(len(segments))
 
 
         self.video_dir = segments[0]
         self.time_interval = segments[1]
         for i in range(2, len(segments)-1):
             partition = segments[i].split(" - ")
-            print("Question = " + partition[0])
             temp_data = json.loads(partition[1])
             temp_question = question.Question()
             temp_question.set_question(partition[0])
@@ -129,19 +127,24 @@ class ReviewWindow(Gtk.Window):#
             return max(temp_data) - min(temp_data)
         if(self.active_method == 4):
             self.plot(temp_data)
+        if(self.active_method == 5):
+            self.best_fit(temp_data, 1)
+        if(self.active_method == 6):
+            self.best_fit(temp_data, 2)
 
 
     def plot(self, temp_data):
         win = Gtk.Window()
         win.set_default_size(1000, 1000)
-        win.set_title("Embedding in GTK")
+        win.set_title(self.questions[self.active_question].get_question())
 
         f = Figure(figsize=(5, 4), dpi=100)
         a = f.add_subplot(111)
         s = temp_data
 
         a.plot(s)
-
+        a.set_xlabel("Time(x)")
+        a.set_ylabel("Input(y)")
         sw = Gtk.ScrolledWindow()
         win.add(sw)
         # A scrolled window border goes outside the scrollbars and viewport
@@ -151,3 +154,32 @@ class ReviewWindow(Gtk.Window):#
         sw.add_with_viewport(canvas)
 
         win.show_all()
+
+    def best_fit(self, temp_data, dimension):
+
+        f = Figure(figsize=(5, 4), dpi=100)
+        a = f.add_subplot(111)
+        s = temp_data
+        t = range(1, len(temp_data) + 1)
+        fit = np.poly1d(np.polyfit(t, s, dimension))
+        format_fit = str(fit).replace('\n', '')
+        win = Gtk.Window()
+        win.set_default_size(1000, 1000)
+        title = self.questions[self.active_question].get_question() + "(y = %s)" % format_fit
+        win.set_title(title)
+
+
+        a.plot(s)
+        a.plot(fit(t))
+        a.set_xlabel("Time(x)")
+        a.set_ylabel("Input(y)")
+        sw = Gtk.ScrolledWindow()
+        win.add(sw)
+        # A scrolled window border goes outside the scrollbars and viewport
+        sw.set_border_width(10)
+        canvas = FigureCanvas(f)  # a Gtk.DrawingArea
+        canvas.set_size_request(800, 600)
+        sw.add_with_viewport(canvas)
+
+        win.show_all()
+
