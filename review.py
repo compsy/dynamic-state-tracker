@@ -9,6 +9,13 @@ from gi.repository import GLib, Gtk, GObject
 gi.require_version('GdkX11', '3.0')
 
 import question
+import statistics
+
+# MATLAB dependancies
+from matplotlib.backends.backend_gtk3agg import (
+    FigureCanvasGTK3Agg as FigureCanvas)
+from matplotlib.figure import Figure
+
 class ReviewWindow(Gtk.Window):#
 
 
@@ -55,6 +62,7 @@ class ReviewWindow(Gtk.Window):#
         name_store.append([1, "Mode"])
         name_store.append([2, "Median"])
         name_store.append([3, "Range"])
+        name_store.append([4, "Graph"])
 
         method_combo = Gtk.ComboBox.new_with_model_and_entry(name_store)
         method_combo.set_entry_text_column(1)
@@ -72,7 +80,6 @@ class ReviewWindow(Gtk.Window):#
 
         self.value_box.pack_start(self.value_string, False, False, 0)
         self.main_box.add(self.value_box)
-
 
         ##
 
@@ -113,4 +120,34 @@ class ReviewWindow(Gtk.Window):#
     def calculate(self):
         temp_data = self.questions[self.active_question].get_data()
         if(self.active_method == 0):
-           return sum(temp_data)/len(temp_data)
+            return sum(temp_data)/len(temp_data)
+        if(self.active_method == 1):
+            return max(set(temp_data), key=temp_data.count)
+        if(self.active_method == 2):
+            return statistics.median(temp_data)
+        if(self.active_method == 3):
+            return max(temp_data) - min(temp_data)
+        if(self.active_method == 4):
+            self.plot(temp_data)
+
+
+    def plot(self, temp_data):
+        win = Gtk.Window()
+        win.set_default_size(1000, 1000)
+        win.set_title("Embedding in GTK")
+
+        f = Figure(figsize=(5, 4), dpi=100)
+        a = f.add_subplot(111)
+        s = temp_data
+
+        a.plot(s)
+
+        sw = Gtk.ScrolledWindow()
+        win.add(sw)
+        # A scrolled window border goes outside the scrollbars and viewport
+        sw.set_border_width(10)
+        canvas = FigureCanvas(f)  # a Gtk.DrawingArea
+        canvas.set_size_request(800, 600)
+        sw.add_with_viewport(canvas)
+
+        win.show_all()
