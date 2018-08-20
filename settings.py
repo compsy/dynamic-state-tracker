@@ -27,6 +27,9 @@ class SettingsWindow(Gtk.Window):#
         self.number_of_questions = 0
         self.question_fields = list()
         self.question_names = list()
+        self.question_slider_buttons = list()
+        self.question_binary_buttons = list()
+
 
         self.parent = parent
 
@@ -63,13 +66,35 @@ class SettingsWindow(Gtk.Window):#
         new_box.add(static_text)
         new_box.add(question_title)
 
+        button_slider = Gtk.RadioButton.new_with_label_from_widget(None, "Slider")
+
+        button_binary = Gtk.RadioButton.new_from_widget(button_slider)
+        button_binary.set_label("Binary")
+
+
+        new_box.add(button_slider)
+        new_box.add(button_binary)
+
+
         self.question_box.add(new_box)
 
         self.question_fields.append(new_box)
         self.question_names.append(question_title)
+        self.question_slider_buttons.append(button_slider)
+        self.question_binary_buttons.append(button_binary)
+
 
         self.number_of_questions += 1
         self.show_all()
+
+
+
+    def on_button_toggled(self, button, name):
+        if button.get_active():
+            state = "on"
+        else:
+            state = "off"
+        print("Button", name, "was turned", state)
 
     def add_current_questions(self, cur_questions):
         for i in range(0, len(cur_questions)):
@@ -103,6 +128,10 @@ class SettingsWindow(Gtk.Window):#
             print("(" + str(i) +") Adding to current: " + self.question_names[i].get_text())
             new_question = question.Question()
             new_question.set_question(self.question_names[i].get_text())
+            if self.question_binary_buttons[i].get_active():
+                new_question.set_type("binary")
+            if self.question_slider_buttons[i].get_active():
+                new_question.set_type("slider")
 
             self.cur_questions.append(new_question)
         print(" -------------------- ")

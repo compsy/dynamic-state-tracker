@@ -233,10 +233,10 @@ class QuestionWindow(Gtk.Window):
         self.mainbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         i = None
         for i in range(0, len(self.questions)):
-            if(self.questions[i].type == "slider"):
-
-                subbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-                ad1 = Gtk.Adjustment(0, 0, 100, 5, 10, 0)
+            subbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+            ad1 = Gtk.Adjustment(0, 0, 100, 5, 10, 0)
+            if (self.questions[i].type == "slider"):
+                ########## SLider
                 self.inputs.append(Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL, adjustment=ad1))
                 self.inputs[i].set_digits(0)
                 self.inputs[i].set_hexpand(True)
@@ -245,12 +245,24 @@ class QuestionWindow(Gtk.Window):
                 last_value = self.questions[i].last_value()
                 if not last_value is None:
                     self.inputs[i].set_value(last_value)
-                self.question_texts.append(Gtk.Label(self.questions[i].question))
+                ###############
+            if (self.questions[i].type == "binary"):
+                ############## Binary
+                print("here")
+                self.inputs.append(Gtk.Switch())
+                self.inputs[i].set_active(False)
 
-                subbox.pack_start(self.question_texts[i], True, True, 0)
-                subbox.pack_start(self.inputs[i], False, False, 0)
+                ###############
 
-                self.mainbox.add(subbox)
+            self.question_texts.append(Gtk.Label(self.questions[i].question))
+
+            subbox.pack_start(self.question_texts[i], True, True, 0)
+            subbox.pack_start(self.inputs[i], False, False, 0)
+
+            self.mainbox.add(subbox)
+
+
+
 
 
 
@@ -265,7 +277,9 @@ class QuestionWindow(Gtk.Window):
 
     def submit(self, event):
         for i in range(0, len(self.questions)):
-            self.questions[i].add_data(self.inputs[i].get_value())
-
+            if(self.questions[i].get_type() == "slider"):
+                self.questions[i].add_data(self.inputs[i].get_value())
+            if (self.questions[i].get_type() == "binary"):
+                self.questions[i].add_data(self.inputs[i].get_active())
         self.parent.restart_record()
         self.destroy()

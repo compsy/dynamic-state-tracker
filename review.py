@@ -17,8 +17,6 @@ from matplotlib.backends.backend_gtk3agg import (
 from matplotlib.figure import Figure
 import numpy as np
 class ReviewWindow(Gtk.Window):#
-
-
     def __init__(self, parent, save_directory):
         self.parent = parent
         Gtk.Window.__init__(self, title="Review")
