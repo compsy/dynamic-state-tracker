@@ -16,7 +16,7 @@ import save_input
 class PlayerWindow(Gtk.Window):
 
 
-    def __init__(self, mrl):
+    def __init__(self, mrl, questions, tick):
         # Create player window
         Gtk.Window.__init__(self, title="Python-Vlc Media Player")
         self.connect("destroy", self.exit_window)
@@ -27,8 +27,8 @@ class PlayerWindow(Gtk.Window):
         self.MRL = mrl
 
 
-
-
+        self.questions = questions
+        self.tick = tick
 
         #Recording Variables
 
@@ -37,8 +37,6 @@ class PlayerWindow(Gtk.Window):
         self.begin_time =  datetime.datetime.now()
         self.offset = 0
 
-
-        #GObject.timeout_add(100, self.print_list)
 
     def show(self):
         self.show_all()
@@ -67,17 +65,6 @@ class PlayerWindow(Gtk.Window):
 
 
 
-        #SLIDER
-        ad1 = Gtk.Adjustment(0, 0, 100, 5, 10, 0)
-        self.slider = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL, adjustment=ad1)
-        self.slider.set_digits(0)
-        self.slider.set_hexpand(True)
-        self.slider.set_valign(Gtk.Align.START)
-        #self.slider.connect("value-changed", self.slider_moved)
-
-        #QUESTION
-        self.question_label = Gtk.Label("this is the question?")
-
 
 
         self.draw_area = Gtk.DrawingArea()
@@ -90,23 +77,48 @@ class PlayerWindow(Gtk.Window):
 
 
 
-        self.sliderbox = Gtk.Box()
-        self.sliderbox.pack_start(self.slider, True, True, 0)
 
-        self.questionbox = Gtk.Box()
-        self.questionbox.pack_start(self.question_label, True, True, 0)
+
 
 
         self.vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.add(self.vbox)
         self.vbox.pack_start(self.draw_area, True, True, 0)
         self.vbox.pack_start(self.hbox, False, False, 0)
-        self.vbox.pack_start(self.sliderbox, False, False, 0)
-        self.vbox.pack_start(self.questionbox, False, False, 0)
+
+        # If slider bar is active this is called.
+        if (len(self.questions) == 1 and self.tick == 100):
+
+
+            # QUESTION
+            self.question_label = Gtk.Label(self.questions[0].question)
+
+
+            # SLIDER
+            ad1 = Gtk.Adjustment(0, 0, 100, 5, 10, 0)
+            self.slider = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL, adjustment=ad1)
+            self.slider.set_digits(0)
+            self.slider.set_hexpand(True)
+            self.slider.set_valign(Gtk.Align.START)
+            # self.slider.connect("value-changed", self.slider_moved)
+
+            self.sliderbox = Gtk.Box()
+            self.sliderbox.pack_start(self.slider, True, True, 0)
+
+
+
+            self.questionbox = Gtk.Box()
+            self.questionbox.pack_start(self.question_label, True, True, 0)
+
+            self.vbox.pack_start(self.questionbox, False, False, 0)
+            self.vbox.pack_start(self.sliderbox, False, False, 0)
+
+
 
 
     # This may do nothing, unsure as of yet.
     def stop_player(self, widget, data=None):
+        print("Stopping player")
         self.player.stop()
         self.is_player_active = False
         self.playback_button.set_image(self.play_image)
@@ -125,7 +137,11 @@ class PlayerWindow(Gtk.Window):
 
             # This restarts the recording after a pause.
             print "starting player"
-            self.record_slider()
+            if (len(self.questions) == 1 and self.tick == 100):
+                self.record_slider()
+            else:
+                self.record_questions()
+
 
         elif self.is_player_active == True and self.player_paused == False:
             self.player.pause()
@@ -146,25 +162,49 @@ class PlayerWindow(Gtk.Window):
         self.is_player_active = True
 
         # This begins the recording of the slider.
-        self.record_slider()
+        if(len(self.questions) == 1 and self.tick == 100):
+            self.record_slider()
+        else:
+            self.record_questions()
         print "video has begun"
 
     def record_slider(self):
         # This function is called every 100ms if the video state is playing.
         # This function records the value of the slider at each tick, or initiates the saving process if the video has ended.
         if(str(self.player.get_state()) == "State.Paused"):
-            self.offset = self.next_position
             pass
         elif(str(self.player.get_state()) == "State.Playing"):
-            self.position_list.append(int(self.slider.get_value()))
-            GObject.timeout_add(100, self.record_slider)
+            self.questions[0].add_data(int(self.slider.get_value()))
+            GObject.timeout_add(self.tick, self.record_slider)
             print str(int(self.slider.get_value()))
         elif(str(self.player.get_state()) == "State.Ended"):
-            self.save_list()
+            save_input.save_input(self, self.MRL, self.questions, self.tick)
         else:
-            GObject.timeout_add(100, self.record_slider)
+            GObject.timeout_add(self.tick, self.record_slider)
+
+    def record_questions(self):
+        if (str(self.player.get_state()) == "State.Paused"):
+            pass
+        elif (str(self.player.get_state()) == "State.Playing"):
+            self.player.pause()
+            self.player_paused = True
+            self.question_window = QuestionWindow(self, self.questions)
+        elif (str(self.player.get_state()) == "State.Ended"):
+            save_input.save_input(self, self.MRL, self.questions, self.tick)
+            pass
+        else:
+            GObject.timeout_add(100, self.record_questions)
 
 
+
+
+    def restart_record(self):
+        self.player.play()
+        self.player_paused = False
+
+
+
+        GObject.timeout_add(self.tick, self.record_questions)
 
     # This is for testing purposes only!
     def print_list(self):
@@ -175,9 +215,71 @@ class PlayerWindow(Gtk.Window):
         save_input.save_input(self, self.position_list)
 
     # This is called to released the player when the player exits the window.
-    def exit_window(self):
-        window.player.stop()
-        window.vlcInstance.release()
+    def exit_window(self, event):
+        self.player.stop()
+        self.vlcInstance.release()
+        self.destroy()
 
 
 
+
+class QuestionWindow(Gtk.Window):
+    def __init__(self, parent, questions):
+        Gtk.Window.__init__(self, title="Python-Vlc Media Player")
+        self.parent = parent
+        self.questions = questions
+        self.inputs = list()
+        self.question_texts = list()
+        self.mainbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        i = None
+        for i in range(0, len(self.questions)):
+            subbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+            ad1 = Gtk.Adjustment(0, 0, 100, 5, 10, 0)
+            if (self.questions[i].type == "slider"):
+                ########## SLider
+                self.inputs.append(Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL, adjustment=ad1))
+                self.inputs[i].set_digits(0)
+                self.inputs[i].set_hexpand(True)
+                self.inputs[i].set_valign(Gtk.Align.START)
+
+                last_value = self.questions[i].last_value()
+                if not last_value is None:
+                    self.inputs[i].set_value(last_value)
+                ###############
+            if (self.questions[i].type == "binary"):
+                ############## Binary
+                print("here")
+                self.inputs.append(Gtk.Switch())
+                self.inputs[i].set_active(False)
+
+                ###############
+
+            self.question_texts.append(Gtk.Label(self.questions[i].question))
+
+            subbox.pack_start(self.question_texts[i], True, True, 0)
+            subbox.pack_start(self.inputs[i], False, False, 0)
+
+            self.mainbox.add(subbox)
+
+
+
+
+
+
+        self.submit_button = Gtk.Button("Continue")
+        self.submit_button.connect("clicked", self.submit)
+        self.mainbox.add(self.submit_button)
+
+
+        self.add(self.mainbox)
+        self.show_all()
+
+
+    def submit(self, event):
+        for i in range(0, len(self.questions)):
+            if(self.questions[i].get_type() == "slider"):
+                self.questions[i].add_data(self.inputs[i].get_value())
+            if (self.questions[i].get_type() == "binary"):
+                self.questions[i].add_data(self.inputs[i].get_active())
+        self.parent.restart_record()
+        self.destroy()
