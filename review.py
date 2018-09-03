@@ -12,12 +12,16 @@ import question
 import statistics
 
 # MATLAB dependancies
+import matplotlib
 from matplotlib.backends.backend_gtk3agg import (
     FigureCanvasGTK3Agg as FigureCanvas)
+
 from matplotlib.figure import Figure
+
 import numpy as np
 class ReviewWindow(Gtk.Window):#
     def __init__(self, parent, save_directory):
+	matplotlib.use('PDF')
         self.parent = parent
         Gtk.Window.__init__(self, title="Review")
         self.main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
