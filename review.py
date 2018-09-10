@@ -13,15 +13,16 @@ import statistics
 
 # MATLAB dependancies
 import matplotlib
+from matplotlib import pyplot
 from matplotlib.backends.backend_gtk3agg import (
     FigureCanvasGTK3Agg as FigureCanvas)
 
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 import numpy as np
-class ReviewWindow(Gtk.Window):#
+class ReviewWindow(Gtk.Window):
     def __init__(self, parent, save_directory):
-	matplotlib.use('PDF')
         self.parent = parent
         Gtk.Window.__init__(self, title="Review")
         self.main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -38,8 +39,8 @@ class ReviewWindow(Gtk.Window):#
 
         self.load_from_file(save_directory)
 
-        ##
-        self.question_box = Gtk.Box()
+        ## SELECT QUESTION
+        self.question_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
         question_label = Gtk.Label("Select a question to review!")
         self.question_box.pack_start(question_label, False, False, 0)
@@ -47,53 +48,81 @@ class ReviewWindow(Gtk.Window):#
         for i in range(0, len(self.questions)):
             name_store.append([1, self.questions[i].get_question()])
 
+        
         question_combo = Gtk.ComboBox.new_with_model_and_entry(name_store)
         question_combo.set_entry_text_column(1)
         question_combo.connect("changed", self.update_question)
         self.question_box.pack_start(question_combo, False, False, 0)
-
-
         self.main_box.add(self.question_box)
+
+	  
+       ## ADD METHODs
+				
+        self.data_box = Gtk.Box()
+        self.method_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.button_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+		
+        method_mean = Gtk.Label("Mean: ")
+        self.data_mean = Gtk.Label("0")
+        box_mean = Gtk.Box()
+
+        method_median = Gtk.Label("Median: ")
+        self.data_median = Gtk.Label("0")
+        box_median = Gtk.Box()
+		
+        method_mode = Gtk.Label("Mode: ")
+        self.data_mode = Gtk.Label("0")
+        box_mode = Gtk.Box()
+		
+        method_range = Gtk.Label("Range: ")
+        self.data_range= Gtk.Label("0")
+        box_range = Gtk.Box()
+		
+        box_mean.pack_start(method_mean, False, False, 0)
+        box_mean.pack_start(self.data_mean, False, False, 0)
+        box_median.pack_start(method_median, False, False, 0)
+        box_median.pack_start(self.data_median, False, False, 0)
+        box_mode.pack_start(method_mode, False, False, 0)
+        box_mode.pack_start(self.data_mode, False, False, 0)
+        box_range.pack_start(method_range, False, False, 0)
+        box_range.pack_start(self.data_range, False, False, 0)
+		
+        self.method_box.add(box_mean)
+        self.method_box.add(box_median)
+        self.method_box.add(box_mode)
+        self.method_box.add(box_range)
+		
+        self.data_box.add(self.method_box)
+        
+        self.main_box.add(self.data_box)
+        self.update_values()
+		
+        
         ##
-        self.method_box = Gtk.Box()
-
-        method_label = Gtk.Label("Select a method of review!")
-        self.method_box.pack_start(method_label, False, False, 0)
-        name_store = Gtk.ListStore(int, str)
-        name_store.append([0, "Mean"])
-        name_store.append([1, "Mode"])
-        name_store.append([2, "Median"])
-        name_store.append([3, "Range"])
-        name_store.append([4, "Graph"])
-        name_store.append([5, "Best fit(1D)"])
-        name_store.append([6, "Best fit(2D)"])
-        method_combo = Gtk.ComboBox.new_with_model_and_entry(name_store)
-        method_combo.set_entry_text_column(1)
-        method_combo.connect("changed", self.update_method)
-        self.method_box.pack_start(method_combo, False, False, 0)
-
-
-
-        self.main_box.add(self.method_box)
-
-
-        ##
-        self.value_box = Gtk.Box()
-        self.value_string = Gtk.Label("None")
-
-        self.value_box.pack_start(self.value_string, False, False, 0)
-        self.main_box.add(self.value_box)
-
-        ##
-
+        
+        self.data_box.add(self.button_box)
+        
+        self.plot_button = Gtk.Button.new_with_label("Plot")
+        self.plot_button.connect("clicked", self.plot_new)
+        self.button_box.pack_end(self.plot_button, False, False, 0)
+       
+        self.plot_button = Gtk.Button.new_with_label("Plot with best fit")
+        self.plot_button.connect("clicked", self.plot_best_new)
+        self.button_box.pack_end(self.plot_button, False, False, 0)
+       
+        self.export_button = Gtk.Button.new_with_label("Export to excel")
+        self.export_button.connect("clicked", self.plot_new)
+        self.button_box.pack_end(self.export_button, False, False, 0)
         self.show_all()
+        
+        
+       
 
     def load_from_file(self, dir):
         file = open(dir, "r")
 
         whole_file_string = file.read()
         segments = whole_file_string.split("//")
-
 
         self.video_dir = segments[0]
         self.time_interval = segments[1]
@@ -103,38 +132,55 @@ class ReviewWindow(Gtk.Window):#
             temp_question = question.Question()
             temp_question.set_question(partition[0])
             temp_question.set_data(temp_data)
-
             self.questions.append(temp_question)
 
 
 
     def update_question(self, widget):
         self.active_question = widget.get_active()
-        self.update_value()
-    def update_method(self, widget):
-        self.active_method = widget.get_active()
-        self.update_value()
-    def update_value(self):
-        self.value_string.set_text(str(self.calculate()))
+        self.update_values()
 
-    def calculate(self):
-        temp_data = self.questions[self.active_question].get_data()
-        if(self.active_method == 0):
-            return sum(temp_data)/len(temp_data)
-        if(self.active_method == 1):
-            return max(set(temp_data), key=temp_data.count)
-        if(self.active_method == 2):
-            return statistics.median(temp_data)
-        if(self.active_method == 3):
-            return max(temp_data) - min(temp_data)
-        if(self.active_method == 4):
-            self.plot(temp_data)
-        if(self.active_method == 5):
-            self.best_fit(temp_data, 1)
-        if(self.active_method == 6):
-            self.best_fit(temp_data, 2)
+    def update_values(self):
+		temp_data = self.questions[self.active_question].get_data()
+		self.data_mean.set_text(str(sum(temp_data)/len(temp_data)))
+		self.data_median.set_text(str(statistics.median(temp_data)))
+		self.data_mode.set_text(str(max(set(temp_data), key=temp_data.count)))
+		self.data_range.set_text(str(max(temp_data) - min(temp_data)))
 
-
+    def plot_new(self, widget):
+		#plot_num = 211
+		#for i in self.questions:
+		#	pyplot.subplot(plot_num)
+		#	pyplot.plot(i.get_data())
+			
+		temp_data = self.questions[self.active_question].get_data()	
+		pyplot.subplot(211)
+		pyplot.plot(temp_data)	
+		pyplot.gcf().text(0.02, 0, "Hey", fontsize = 14)
+		pyplot.show()
+		
+    def plot_best_new(self, widget):
+        dimension = 2
+		
+		
+        temp_data = self.questions[self.active_question].get_data()	
+        pyplot.subplot(211)
+        pyplot.plot(temp_data)	
+		
+		
+        t = range(1, len(temp_data) + 1)
+        fit = np.poly1d(np.polyfit(t, temp_data, dimension))
+        format_fit = str(fit).replace('\n', '')
+        
+        pyplot.subplot(211)
+        pyplot.plot(fit(t))
+		
+        pyplot.gcf().text(0.02, 0.25, format_fit, fontsize = 14)
+        
+        
+        pyplot.show()
+		
+        
     def plot(self, temp_data):
         win = Gtk.Window()
         win.set_default_size(1000, 1000)
@@ -152,7 +198,6 @@ class ReviewWindow(Gtk.Window):#
         # A scrolled window border goes outside the scrollbars and viewport
         sw.set_border_width(10)
         canvas = FigureCanvas(f)  # a Gtk.DrawingArea
-        canvas.set_size_request(800, 600)
         sw.add_with_viewport(canvas)
 
         win.show_all()
