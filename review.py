@@ -98,7 +98,7 @@ class ReviewWindow(Gtk.Window):
         self.update_values()
 		
         
-        ##
+        ## Add 
         
         self.data_box.add(self.button_box)
         
@@ -111,7 +111,7 @@ class ReviewWindow(Gtk.Window):
         self.button_box.pack_end(self.plot_button, False, False, 0)
        
         self.export_button = Gtk.Button.new_with_label("Export to excel")
-        self.export_button.connect("clicked", self.plot_new)
+        self.export_button.connect("clicked", self.write_to_excel)
         self.button_box.pack_end(self.export_button, False, False, 0)
         self.show_all()
         
@@ -146,22 +146,35 @@ class ReviewWindow(Gtk.Window):
 		self.data_median.set_text(str(statistics.median(temp_data)))
 		self.data_mode.set_text(str(max(set(temp_data), key=temp_data.count)))
 		self.data_range.set_text(str(max(temp_data) - min(temp_data)))
-
+		
+		
+    def write_to_excel(self, widget):
+		import xlwt
+		
+		workbook = xlwt.Workbook()
+		worksheet = workbook.add_sheet("my sheet")
+		
+		yPos = 0
+		xPos = 0
+		for i in self.questions:
+			worksheet.write(yPos, xPos, i.get_question())
+			xPos = 1
+			for n in i.get_data():
+				worksheet.write(yPos, xPos, n)
+				xPos = xPos+1
+			yPos = yPos+1
+		
+		workbook.save("text.xls")
+		
     def plot_new(self, widget):
-		#plot_num = 211
-		#for i in self.questions:
-		#	pyplot.subplot(plot_num)
-		#	pyplot.plot(i.get_data())
-			
 		temp_data = self.questions[self.active_question].get_data()	
 		pyplot.subplot(211)
 		pyplot.plot(temp_data)	
-		pyplot.gcf().text(0.02, 0, "Hey", fontsize = 14)
+		pyplot.title(self.questions[self.active_question].get_question())
 		pyplot.show()
 		
     def plot_best_new(self, widget):
         dimension = 2
-		
 		
         temp_data = self.questions[self.active_question].get_data()	
         pyplot.subplot(211)
@@ -177,7 +190,7 @@ class ReviewWindow(Gtk.Window):
 		
         pyplot.gcf().text(0.02, 0.25, format_fit, fontsize = 14)
         
-        
+        pyplot.title(self.questions[self.active_question].get_question())
         pyplot.show()
 		
         
@@ -229,4 +242,5 @@ class ReviewWindow(Gtk.Window):
         sw.add_with_viewport(canvas)
 
         win.show_all()
+
 
