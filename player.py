@@ -136,7 +136,7 @@ class PlayerWindow(Gtk.Window):
             self.player_paused = False
 
             # This restarts the recording after a pause.
-            print "starting player"
+            print ("starting player")
             if (len(self.questions) == 1 and self.tick == 100):
                 self.record_slider()
             else:
@@ -166,7 +166,7 @@ class PlayerWindow(Gtk.Window):
             self.record_slider()
         else:
             self.record_questions()
-        print "video has begun"
+        print ("video has begun")
 
     def record_slider(self):
         # This function is called every 100ms if the video state is playing.
@@ -176,7 +176,6 @@ class PlayerWindow(Gtk.Window):
         elif(str(self.player.get_state()) == "State.Playing"):
             self.questions[0].add_data(int(self.slider.get_value()))
             GObject.timeout_add(self.tick, self.record_slider)
-            print str(int(self.slider.get_value()))
         elif(str(self.player.get_state()) == "State.Ended"):
             save_input.save_input(self, self.MRL, self.questions, self.tick)
         else:
@@ -208,7 +207,7 @@ class PlayerWindow(Gtk.Window):
 
     # This is for testing purposes only!
     def print_list(self):
-        print self.position_list
+        print (self.position_list)
 
     # This is the link between the player and the saving library.
     def save_list(self):

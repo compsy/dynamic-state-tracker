@@ -141,37 +141,37 @@ class ReviewWindow(Gtk.Window):
         self.update_values()
 
     def update_values(self):
-		temp_data = self.questions[self.active_question].get_data()
-		self.data_mean.set_text(str(sum(temp_data)/len(temp_data)))
-		self.data_median.set_text(str(statistics.median(temp_data)))
-		self.data_mode.set_text(str(max(set(temp_data), key=temp_data.count)))
-		self.data_range.set_text(str(max(temp_data) - min(temp_data)))
+        temp_data = self.questions[self.active_question].get_data()
+        self.data_mean.set_text(str(sum(temp_data)/len(temp_data)))
+        self.data_median.set_text(str(statistics.median(temp_data)))
+        self.data_mode.set_text(str(max(set(temp_data), key=temp_data.count)))
+        self.data_range.set_text(str(max(temp_data) - min(temp_data)))
 		
 		
     def write_to_excel(self, widget):
-		import xlwt
+        import xlwt
 		
-		workbook = xlwt.Workbook()
-		worksheet = workbook.add_sheet("my sheet")
+        workbook = xlwt.Workbook()
+        worksheet = workbook.add_sheet("my sheet")
 		
-		yPos = 0
-		xPos = 0
-		for i in self.questions:
-			worksheet.write(yPos, xPos, i.get_question())
-			xPos = 1
-			for n in i.get_data():
-				worksheet.write(yPos, xPos, n)
-				xPos = xPos+1
-			yPos = yPos+1
+        yPos = 0
+        for i in self.questions:
+            xPos = 0
+            worksheet.write(yPos, xPos, i.get_question())
+            xPos = 1
+            for n in i.get_data():
+                worksheet.write(yPos, xPos, n)
+                xPos = xPos+1
+            yPos = yPos+1
 		
-		workbook.save("text.xls")
+        workbook.save("text.xls")
 		
     def plot_new(self, widget):
-		temp_data = self.questions[self.active_question].get_data()	
-		pyplot.subplot(211)
-		pyplot.plot(temp_data)	
-		pyplot.title(self.questions[self.active_question].get_question())
-		pyplot.show()
+        temp_data = self.questions[self.active_question].get_data()	
+        pyplot.subplot(211)
+        pyplot.plot(temp_data)	
+        pyplot.title(self.questions[self.active_question].get_question())
+        pyplot.show()
 		
     def plot_best_new(self, widget):
         dimension = 2
