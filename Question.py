@@ -5,7 +5,7 @@ class Question():
 
     def __init__(self):
         self.question = "not set"
-        self.type = "binary"
+        self.type = "Slider"
         self.data = list()
 
     def set_question(self, question_param):

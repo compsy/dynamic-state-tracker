@@ -22,6 +22,7 @@ class MainWindow(QMainWindow):
    
         # Initalize Questions list
         self.questions = list()
+        self.time = 1000
         
         # add fake data for testing.
         test_question = Question.Question()
@@ -54,15 +55,20 @@ class MainWindow(QMainWindow):
     
     
     def play_video(self):
-        player = MediaPlayer.MediaPlayer(self)
+        player = MediaPlayer.MediaPlayer(self, self.questions, self.time)
         player.show()
         
     def set_questions(self):
         window = SetQuestions.QuestionsWindow(self, self.questions)
         window.show()
-    def import_questions(self, new_questions):
+    def import_questions(self, new_questions, new_time):
         self.questions = new_questions
-    
+        try:
+            self.time = int(new_time)
+        except:
+            print("invalid time selected, set to default of 1 second")
+            self.time = 1000
+        
     def review(self):
         fileName, _ = QFileDialog.getOpenFileName(self,"Open File", "","All Files (*);;Python Files (*.py)")
         if fileName:

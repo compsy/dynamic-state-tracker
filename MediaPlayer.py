@@ -11,8 +11,10 @@ import sys
 
 class MediaPlayer(QMainWindow):
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, questions = None, time = None):
         super(MediaPlayer, self).__init__(parent)
+        self.questions = questions 
+        self.time = time
         self.setWindowTitle("Dynamic State Tracker 2.0") 
         self.resize(500, 500)
         print ("Starting player!")
@@ -25,9 +27,14 @@ class MediaPlayer(QMainWindow):
         self.playButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
         self.playButton.clicked.connect(self.play)
 
+        
+    
         self.positionSlider = QSlider(Qt.Horizontal)
         self.positionSlider.setRange(0, 0)
         self.positionSlider.sliderMoved.connect(self.setPosition)
+
+        
+
 
         self.errorLabel = QLabel()
         self.errorLabel.setSizePolicy(QSizePolicy.Preferred,
@@ -77,24 +84,29 @@ class MediaPlayer(QMainWindow):
         
         
         # Create slider and label
-        self.percent_text = QLabel("0")
+           
+        ## ADD INPUT METHOD DEPENDING ON AMOUNT OF QUESTIONS AND TIME
+
         
-        self.slider = QSlider(Qt.Horizontal)
-        self.slider.setFocusPolicy(Qt.StrongFocus)
-        self.slider.setTickPosition(QSlider.TicksBothSides)
-        self.slider.setTickInterval(10)
-        self.slider.setSingleStep(1)      
-        self.slider.valueChanged.connect(self.value_change)
-        
- 
-        
-        # Create layouts to place slider inside
-        sliderLayout = QHBoxLayout()
-        sliderLayout.setContentsMargins(0, 0, 0, 0)
-        sliderLayout.addWidget(self.slider)
-        sliderLayout.addWidget(self.percent_text)
-        
-        layout.addLayout(sliderLayout)
+        if(len(self.questions) == 1):
+                self.percent_text = QLabel("0")
+                self.slider = QSlider(Qt.Horizontal)
+                self.slider.setFocusPolicy(Qt.StrongFocus)
+                self.slider.setTickPosition(QSlider.TicksBothSides)
+                self.slider.setTickInterval(10)
+                self.slider.setSingleStep(1)      
+                self.slider.valueChanged.connect(self.value_change)
+                self.type = "one"
+                
+                #Create layouts to place slider inside
+                sliderLayout = QHBoxLayout()
+                sliderLayout.setContentsMargins(0, 0, 0, 0)
+                sliderLayout.addWidget(self.slider)
+                sliderLayout.addWidget(self.percent_text)
+                
+                layout.addLayout(sliderLayout)
+        elif(len(self.questions) > 1):
+                self.type = "multi"
         
         # Add error label to layout
         layout.addWidget(self.errorLabel)
@@ -122,6 +134,10 @@ class MediaPlayer(QMainWindow):
             self.mediaPlayer.pause()
         else:
             self.mediaPlayer.play()
+            if(self.type == "one"):
+                self.recordBar()
+            elif(self.type == "multi"):
+                self.recordPopUp()
 
     def mediaStateChanged(self, state):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
@@ -143,3 +159,10 @@ class MediaPlayer(QMainWindow):
     def handleError(self):
         self.playButton.setEnabled(False)
         self.errorLabel.setText("Error: " + self.mediaPlayer.errorString())
+        
+    def recordBar(self):
+        print("recording slider!")
+        
+    
+    def recordPopUp(self):
+        print("recrding pop up!")
