@@ -4,6 +4,8 @@ https://codecguide.com/download_k-lite_codec_pack_basic.htm
 
 Next, ensure you have python3.7 installed. 
 
+Next, Clone the directory onto your pc. Using git clone or by downloading and extracting manually.
+
 Next, create a virtual environmet for the application
 This can be done by install virtualenv and typing 'virtualenv venv' in the directory
 of your application.
