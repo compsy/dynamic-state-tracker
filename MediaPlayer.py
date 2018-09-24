@@ -18,7 +18,9 @@ class MediaPlayer(QMainWindow):
         self.questions = questions 
         self.time = time
         self.setWindowTitle("Dynamic State Tracker 2.0") 
-        self.resize(500, 800)
+        #self.resize(500, 800)
+        self.showMaximized()
+        
         print ("Starting player!")
         self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
 
@@ -71,9 +73,12 @@ class MediaPlayer(QMainWindow):
         controlLayout.addWidget(self.playButton)
         controlLayout.addWidget(self.positionSlider)
 
-        layout = QVBoxLayout()
-        layout.addWidget(videoWidget)
-        layout.addLayout(controlLayout)
+        layout = QGridLayout()
+        layout.setRowStretch(0,2)
+        #layout.setColumnStretch(1,1)
+        layout.setVerticalSpacing(1)
+        layout.addWidget(videoWidget,0,0)
+        layout.addLayout(controlLayout,1,0)
 
         # Set widget to contain window contents
         wid.setLayout(layout)
@@ -101,11 +106,11 @@ class MediaPlayer(QMainWindow):
                 self.type = "one"
                 
                 self.question_text = QLabel(self.questions[0].get_question())
-                
+                layout.addWidget(self.question_text, 3, 0, Qt.AlignCenter)
                 #Create layouts to place slider inside
                 sliderLayout = QHBoxLayout()
                 sliderLayout.setContentsMargins(0, 0, 0, 0)
-                sliderLayout.addWidget(self.question_text)
+                
                 sliderLayout.addWidget(self.slider)
                 sliderLayout.addWidget(self.percent_text)
                
@@ -113,7 +118,7 @@ class MediaPlayer(QMainWindow):
                 
                 
                 
-                layout.addLayout(sliderLayout)
+                layout.addLayout(sliderLayout,4,0)
         elif(len(self.questions) > 1):
                 self.type = "multi"
         
@@ -125,6 +130,13 @@ class MediaPlayer(QMainWindow):
         # Add error label to layout
         layout.addWidget(self.errorLabel)
 
+        
+ 
+    def closeEvent(self, event):
+        print ("Closing")
+        self.timer.stop()
+        self.close()
+        
     def value_change(self):
         size = str(self.slider.value())
         self.percent_text.setText(size)
@@ -145,6 +157,7 @@ class MediaPlayer(QMainWindow):
         print("Exiting!")
         sys.exit(app.exec_())
 
+            
     def play(self):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
             self.mediaPlayer.pause()
@@ -183,9 +196,26 @@ class MediaPlayer(QMainWindow):
                 self.questions[0].add_data(self.slider.value())
                 print("recording value: " + str(self.slider.value()))
          elif self.type == "multi":
+                self.timer.stop()
+                popup = MultiQuestionPopUP(self)
                 print("recrding pop up!")
         
-
+class MultiQuestionPopUP(QMainWindow):
+    def __init__(self, parent=None):
+        super(MultiQuestionPopUP, self).__init__(parent)
+        
+        self.parent = parent
+        self.layout = QGridLayout()
+        self.main_widget = QWidget()
+        self.setCentralWidget(self.main_widget) 
+        self.main_widget.setLayout(self.layout)
+        
+        self.temp_label = QLabel("Multi Questions not yet implemented!")
+        self.layout.addWidget(self.temp_label, 0, 0)
+        
+        self.show()
+        self.parent.close()
+        
 class SaveFileWindow(QMainWindow):
      def __init__(self, parent=None):
         super(SaveFileWindow, self).__init__(parent)
@@ -206,7 +236,7 @@ class SaveFileWindow(QMainWindow):
         self.layout.addWidget(self.save_button, 0, 1)
         
         self.show()
-        
+
      def save_file(self):
         file_name = self.file_name_box.text()
         
