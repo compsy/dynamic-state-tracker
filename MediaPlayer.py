@@ -1,5 +1,5 @@
 
-from PyQt5.QtCore import QDir, Qt, QUrl
+from PyQt5.QtCore import QDir, Qt, QUrl, QThread, QRunnable, QThreadPool
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
@@ -7,7 +7,8 @@ from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
 from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction, QGridLayout
 from PyQt5.QtGui import QIcon
 import sys
-
+import threading
+import time
 
 class MediaPlayer(QMainWindow):
 
@@ -15,8 +16,9 @@ class MediaPlayer(QMainWindow):
         super(MediaPlayer, self).__init__(parent)
         self.questions = questions 
         self.time = time
+
         self.setWindowTitle("Dynamic State Tracker 2.0") 
-        self.resize(500, 500)
+        self.resize(500, 800)
         print ("Starting player!")
         self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
 
@@ -98,11 +100,18 @@ class MediaPlayer(QMainWindow):
                 self.slider.valueChanged.connect(self.value_change)
                 self.type = "one"
                 
+                self.question_text = QLabel(self.questions[0].get_question())
+                
                 #Create layouts to place slider inside
                 sliderLayout = QHBoxLayout()
                 sliderLayout.setContentsMargins(0, 0, 0, 0)
+                sliderLayout.addWidget(self.question_text)
                 sliderLayout.addWidget(self.slider)
                 sliderLayout.addWidget(self.percent_text)
+               
+                
+                
+                
                 
                 layout.addLayout(sliderLayout)
         elif(len(self.questions) > 1):
@@ -127,6 +136,7 @@ class MediaPlayer(QMainWindow):
             self.playButton.setEnabled(True)
 
     def exitCall(self):
+        print("Exiting!")
         sys.exit(app.exec_())
 
     def play(self):
@@ -134,11 +144,7 @@ class MediaPlayer(QMainWindow):
             self.mediaPlayer.pause()
         else:
             self.mediaPlayer.play()
-            if(self.type == "one"):
-                self.recordBar()
-            elif(self.type == "multi"):
-                self.recordPopUp()
-
+            self.start_recording()
     def mediaStateChanged(self, state):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
             self.playButton.setIcon(
@@ -159,10 +165,28 @@ class MediaPlayer(QMainWindow):
     def handleError(self):
         self.playButton.setEnabled(False)
         self.errorLabel.setText("Error: " + self.mediaPlayer.errorString())
+            
+    def start_recording(self):
+        self.p = ProcessRunnable(target=self.record())
+        self.p.start()
         
-    def recordBar(self):
-        print("recording slider!")
+    def record(self):
+         if self.type == "one":
+                print("recrding slider!")
+         elif self.type == "multi":
+                print("recrding pop up!")
         
-    
-    def recordPopUp(self):
-        print("recrding pop up!")
+class ProcessRunnable(QRunnable):
+    def __init__(self, target, args = None):
+        QRunnable.__init__(self)
+        self.t = target
+        self.args = args
+
+    def run(self):
+        if self.args == None:
+            self.t()
+        else:
+            self.t(*self.args)
+
+    def start(self):
+        QThreadPool.globalInstance().start(self)

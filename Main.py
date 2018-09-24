@@ -24,16 +24,12 @@ class MainWindow(QMainWindow):
         self.questions = list()
         self.time = 1000
         
-        # add fake data for testing.
-        test_question = Question.Question()
-        test_question.set_question("text123")
-        self.questions.append(test_question)
+        # Add the inital question
+        first_question = Question.Question()
+        first_question.set_question("First question")
+        self.questions.append(first_question)
         
-        test_question = Question.Question()
-        test_question.set_question("text125")
-        self.questions.append(test_question)
-        self.questions.append(test_question)
-        self.questions.append(test_question)
+
     def initalize_buttons(self):
         # Create playVideoButton and link to function play_video
         self.playVideoButton = QPushButton("Play Video", self)

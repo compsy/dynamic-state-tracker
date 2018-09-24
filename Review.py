@@ -10,6 +10,8 @@ import Question
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
+import numpy as np
+import statistics
 
 class ReviewWindow(QMainWindow):
     def __init__(self, parent=None, file_name=None):
@@ -36,7 +38,8 @@ class ReviewWindow(QMainWindow):
         self.add_combo_box()
         self.question_index = 0
         
-        self.add_plot()
+        self.add_plot_with_best_fit()
+        self.add_other_buttons()
         
     def load_file(self, file_name):
         f = open(file_name, 'r')
@@ -74,15 +77,89 @@ class ReviewWindow(QMainWindow):
          self.question_index = self.comboBox.currentIndex()
          
          self.plot.clear()
-         self.plot.plot()
+         self.plot.best_fit(2)
          
          
          
     def add_plot(self):
         self.plot = PlotCanvas(self, 5, 4, 100)
+        self.plot.plot()
+        self.layout.addWidget(self.plot, 2, 1)
         
+    def add_plot_with_best_fit(self):
+        self.plot = PlotCanvas(self, 5, 4, 100)
+        self.plot.best_fit(2)
         self.layout.addWidget(self.plot, 2, 1)
     
+    def add_other_buttons(self):
+    
+        export_button = QPushButton("Export")
+        export_button.clicked.connect(self.write_to_excel)
+        self.layout.addWidget(export_button, 3, 1)
+        
+        stats_button = QPushButton("Statistics")
+        stats_button.clicked.connect(self.open_stats_window)
+        self.layout.addWidget(stats_button, 4, 1)
+        
+        
+    def open_stats_window(self):
+        new_window = StatsWindow(self)
+        new_window.show()
+    def write_to_excel(self, widget):
+        import xlwt
+		
+        workbook = xlwt.Workbook()
+        worksheet = workbook.add_sheet("my sheet")
+		
+        yPos = 0
+        for i in self.questions:
+            xPos = 0
+            worksheet.write(yPos, xPos, i.get_question())
+            xPos = 1
+            for n in i.get_data():
+                worksheet.write(yPos, xPos, n)
+                xPos = xPos+1
+            yPos = yPos+1
+		
+        workbook.save("exported_data.xls")
+        
+class StatsWindow(QMainWindow):
+    def __init__(self, parent=None):
+        super(StatsWindow, self).__init__(parent)
+        self.parent = parent
+        self.layout = QGridLayout()
+        self.main_widget = QWidget()
+        self.setCentralWidget(self.main_widget) 
+        self.main_widget.setLayout(self.layout)
+
+        #method_mean = QLabel("Mean: ")
+        self.data_mean = QLabel("0")
+
+        #method_median = QLabel("Median: ")
+        self.data_median = QLabel("0")
+
+        #method_mode = QLabel("Mode: ")
+        self.data_mode = QLabel("0")
+
+        #method_range = QLabel("Range: ")
+        self.data_range= QLabel("0")
+
+        self.layout.addWidget(self.data_mean, 0,0)
+        self.layout.addWidget(self.data_median, 1,0)        
+        self.layout.addWidget(self.data_mode, 2,0)
+        self.layout.addWidget(self.data_range, 3,0)      
+
+        self.update_values()
+        
+        
+    def update_values(self):
+        temp_data = self.parent.questions[self.parent.question_index].get_data()
+        self.data_mean.setText("Mean: " + str(sum(temp_data)/len(temp_data)))
+        self.data_median.setText("Median: " + str(statistics.median(temp_data)))
+        self.data_mode.setText("Mode: " + str(max(set(temp_data), key=temp_data.count)))
+        self.data_range.setText("Range: " + str(max(temp_data) - min(temp_data)))
+
+        
  
 class PlotCanvas(FigureCanvas):
  
@@ -98,7 +175,7 @@ class PlotCanvas(FigureCanvas):
                 QSizePolicy.Expanding,
                 QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
-        self.plot()
+
  
  
     def plot(self):
@@ -106,6 +183,19 @@ class PlotCanvas(FigureCanvas):
         ax = self.figure.add_subplot(111)
         ax.plot(data, 'r-')
         ax.set_title(self.parent.questions[self.parent.question_index].get_question())
+        self.draw()
+        
+    def best_fit(self, dimension):
+        data = self.parent.questions[self.parent.question_index].get_data()
+        ax = self.figure.add_subplot(111)
+        ax.plot(data, 'r-')
+        ax.set_title(self.parent.questions[self.parent.question_index].get_question())
+        
+        
+        t = range(1, len(data) + 1)
+        fit = np.poly1d(np.polyfit(t, data, dimension))
+        ax.plot(fit(t))
+        
         self.draw()
         
     def clear(self):
