@@ -1,14 +1,15 @@
 
-from PyQt5.QtCore import QDir, Qt, QUrl, QThread, QRunnable, QThreadPool
+from PyQt5.QtCore import QDir, Qt, QUrl, QThread, QRunnable, QThreadPool, QTimer
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
         QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget)
-from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction, QGridLayout
+from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction, QGridLayout, QLineEdit
 from PyQt5.QtGui import QIcon
 import sys
 import threading
 import time
+import json
 
 class MediaPlayer(QMainWindow):
 
@@ -16,7 +17,6 @@ class MediaPlayer(QMainWindow):
         super(MediaPlayer, self).__init__(parent)
         self.questions = questions 
         self.time = time
-
         self.setWindowTitle("Dynamic State Tracker 2.0") 
         self.resize(500, 800)
         print ("Starting player!")
@@ -117,6 +117,11 @@ class MediaPlayer(QMainWindow):
         elif(len(self.questions) > 1):
                 self.type = "multi"
         
+        
+        #Add timer
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.record)
+        
         # Add error label to layout
         layout.addWidget(self.errorLabel)
 
@@ -134,6 +139,7 @@ class MediaPlayer(QMainWindow):
             self.mediaPlayer.setMedia(
                     QMediaContent(QUrl.fromLocalFile(fileName)))
             self.playButton.setEnabled(True)
+            self.video_dir = fileName
 
     def exitCall(self):
         print("Exiting!")
@@ -144,14 +150,20 @@ class MediaPlayer(QMainWindow):
             self.mediaPlayer.pause()
         else:
             self.mediaPlayer.play()
-            self.start_recording()
     def mediaStateChanged(self, state):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
             self.playButton.setIcon(
                     self.style().standardIcon(QStyle.SP_MediaPause))
+                
+            self.timer.start(self.time)
+        elif self.mediaPlayer.state() == QMediaPlayer.StoppedState:
+            print("video ended!")
+            self.timer.stop()
+            save_window = SaveFileWindow(self)
         else:
             self.playButton.setIcon(
                     self.style().standardIcon(QStyle.SP_MediaPlay))
+            self.timer.stop()
 
     def positionChanged(self, position):
         self.positionSlider.setValue(position)
@@ -165,28 +177,75 @@ class MediaPlayer(QMainWindow):
     def handleError(self):
         self.playButton.setEnabled(False)
         self.errorLabel.setText("Error: " + self.mediaPlayer.errorString())
-            
-    def start_recording(self):
-        self.p = ProcessRunnable(target=self.record())
-        self.p.start()
         
     def record(self):
          if self.type == "one":
-                print("recrding slider!")
+                self.questions[0].add_data(self.slider.value())
+                print("recording value: " + str(self.slider.value()))
          elif self.type == "multi":
                 print("recrding pop up!")
         
-class ProcessRunnable(QRunnable):
-    def __init__(self, target, args = None):
-        QRunnable.__init__(self)
-        self.t = target
-        self.args = args
 
-    def run(self):
-        if self.args == None:
-            self.t()
-        else:
-            self.t(*self.args)
+class SaveFileWindow(QMainWindow):
+     def __init__(self, parent=None):
+        super(SaveFileWindow, self).__init__(parent)
 
-    def start(self):
-        QThreadPool.globalInstance().start(self)
+        
+        
+        self.parent = parent
+        self.layout = QGridLayout()
+        self.main_widget = QWidget()
+        self.setCentralWidget(self.main_widget) 
+        self.main_widget.setLayout(self.layout)
+        
+        self.file_name_box = QLineEdit("File name here")
+        self.layout.addWidget(self.file_name_box, 0, 0)
+        
+        self.save_button = QPushButton("Save file")
+        self.save_button.clicked.connect(self.save_file)
+        self.layout.addWidget(self.save_button, 0, 1)
+        
+        self.show()
+        
+     def save_file(self):
+        file_name = self.file_name_box.text()
+        
+        try:
+            f = open("saves/" + file_name + ".txt", "w+")
+            f.write(self.parent.video_dir + "//")
+            f.write(str(self.parent.time) + "//")
+            
+            for q in self.parent.questions:
+                save_string = q.get_question() + " - " + json.dumps(q.get_data())
+                f.write(save_string + "//")
+            
+            f.close()
+            print("Sucessfully saved!")
+            
+        except:
+            print("Saving failed!")
+        
+        exit_window = EndWindow(self, "Goodbye!")
+        #new_window = SaveFileWindow(self)
+    
+class EndWindow(QMainWindow):
+    def __init__(self, parent = None, text = None):
+        super(EndWindow, self).__init__(parent)
+        self.parent = parent
+        self.layout = QGridLayout()
+        self.main_widget = QWidget()
+        self.setCentralWidget(self.main_widget) 
+        self.main_widget.setLayout(self.layout)
+        
+        self.label = QLabel(text)
+        self.accept_button = QPushButton("Finish")
+        self.accept_button.clicked.connect(self.accept)
+        
+        self.layout.addWidget(self.label, 0, 0)
+        self.layout.addWidget(self.accept_button, 1, 0)
+        
+        self.show()
+    def accept(self):
+        self.parent.parent.close()
+        self.parent.close()
+        self.close()
