@@ -1,1 +1,0 @@
-/home/oli26/PycharmProjects/DST2/SampleVideo_1280x720_1mb.mp4//1500//How confident were you? - [0.0, 83.0, 34.0, 34.0]//How scared were you? - [0.0, 31.0, 82.0, 45.0]//How tired were you? - [0.0, 68.0, 9.0, 47.0]//How shocked were you? - [37.0, 58.0, 93.0, 93.0]//

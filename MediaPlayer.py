@@ -10,12 +10,15 @@ import sys
 import threading
 import time
 import json
+import Form
 
 class MediaPlayer(QMainWindow):
 
-    def __init__(self, parent=None, questions = None, time = None):
+    def __init__(self, parent=None, questions = None, time = None, answered_form = None):
         super(MediaPlayer, self).__init__(parent)
         self.questions = questions 
+        self.answered_form = answered_form
+  
         self.time = time
         self.setWindowTitle("Dynamic State Tracker 2.0") 
         #self.resize(500, 800)
@@ -148,6 +151,7 @@ class MediaPlayer(QMainWindow):
                 QDir.homePath())
 
         if fileName != '':
+            print (fileName)
             self.mediaPlayer.setMedia(
                     QMediaContent(QUrl.fromLocalFile(fileName)))
             self.playButton.setEnabled(True)
@@ -249,6 +253,16 @@ class SaveFileWindow(QMainWindow):
                 save_string = q.get_question() + " - " + json.dumps(q.get_data())
                 f.write(save_string + "//")
             
+            f.write("~")
+                 
+            
+            for q in self.parent.answered_form:
+                first_text = str(q.get_question())
+                second_text = str(q.get_data())
+                save_string = first_text + " - " + second_text
+                f.write(save_string + "//")
+            
+            
             f.close()
             print("Sucessfully saved!")
             
@@ -256,7 +270,6 @@ class SaveFileWindow(QMainWindow):
             print("Saving failed!")
         
         exit_window = EndWindow(self, "Goodbye!")
-        #new_window = SaveFileWindow(self)
     
 class EndWindow(QMainWindow):
     def __init__(self, parent = None, text = None):

@@ -1,11 +1,11 @@
 import PyQt5 
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
         QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget)
-from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction, QComboBox, QGridLayout
+from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction, QComboBox, QGridLayout, QLineEdit
 import sys
 import json
 import Question
-
+import Form
  
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -18,6 +18,7 @@ class ReviewWindow(QMainWindow):
         super(ReviewWindow, self).__init__(parent)
         
         self.questions = list()
+        self.form_list = list()
         self.load_file(file_name)
         
         
@@ -47,19 +48,32 @@ class ReviewWindow(QMainWindow):
             data = f.read()
             self.load_data(data)
 
-    def load_data(self, data):  
-        segments = data.split("//")
-
-        self.video_dir = segments[0]
-        self.time_interval = segments[1]
-        for i in range(2, len(segments)-1):
+    def load_data(self, data):
+        split_between_question_and_form_data = data.split("~")
+        
+        question_segments = split_between_question_and_form_data[0].split("//")
+        form_segments =  split_between_question_and_form_data[1].split("//")
+        
+        
+        self.video_dir = question_segments[0]
+        self.time_interval = question_segments[1]
+        for i in range(2, len(question_segments)-1):
            
-            partition = segments[i].split(" - ")
+            partition = question_segments[i].split(" - ")
             temp_data = json.loads(partition[1])
             temp_question = Question.Question()
             temp_question.set_question(partition[0])
             temp_question.set_data(temp_data)
             self.questions.append(temp_question)
+            
+            
+        for i in range(0, len(form_segments)-1):
+            partition = form_segments[i].split(" - ")
+            temp_form = Form.Form()
+            temp_form.set_question(partition[0])
+            temp_form.set_data(partition[1])
+            self.form_list.append(temp_form)
+            
         print("Load complete!")
         
     
@@ -106,22 +120,7 @@ class ReviewWindow(QMainWindow):
         new_window = StatsWindow(self)
         new_window.show()
     def write_to_excel(self, widget):
-        import xlwt
-		
-        workbook = xlwt.Workbook()
-        worksheet = workbook.add_sheet("my sheet")
-		
-        yPos = 0
-        for i in self.questions:
-            xPos = 0
-            worksheet.write(yPos, xPos, i.get_question())
-            xPos = 1
-            for n in i.get_data():
-                worksheet.write(yPos, xPos, n)
-                xPos = xPos+1
-            yPos = yPos+1
-		
-        workbook.save("exported_data.xls")
+       window = SaveExcel(self)
         
 class StatsWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -132,16 +131,12 @@ class StatsWindow(QMainWindow):
         self.setCentralWidget(self.main_widget) 
         self.main_widget.setLayout(self.layout)
 
-        #method_mean = QLabel("Mean: ")
         self.data_mean = QLabel("0")
 
-        #method_median = QLabel("Median: ")
         self.data_median = QLabel("0")
 
-        #method_mode = QLabel("Mode: ")
         self.data_mode = QLabel("0")
 
-        #method_range = QLabel("Range: ")
         self.data_range= QLabel("0")
 
         self.layout.addWidget(self.data_mean, 0,0)
@@ -200,3 +195,54 @@ class PlotCanvas(FigureCanvas):
         
     def clear(self):
         self.axes.clear()
+        
+        
+        
+class SaveExcel(QMainWindow):
+     def __init__(self, parent=None):
+        super(SaveExcel, self).__init__(parent)
+
+        
+        
+        self.parent = parent
+        self.layout = QGridLayout()
+        self.main_widget = QWidget()
+        self.setCentralWidget(self.main_widget) 
+        self.main_widget.setLayout(self.layout)
+        
+        self.file_name_box = QLineEdit("File name here")
+        self.layout.addWidget(self.file_name_box, 0, 0)
+        
+        self.save_button = QPushButton("Save file")
+        self.save_button.clicked.connect(self.save)
+        self.layout.addWidget(self.save_button, 0, 1)
+        
+        self.show()
+     def save(self):
+        import xlwt
+		
+        workbook = xlwt.Workbook()
+        worksheet = workbook.add_sheet("my sheet")
+		
+ 
+        xPos = 0        
+        for i in self.parent.form_list:
+            worksheet.write(0, xPos, i.get_question())
+            worksheet.write(1, xPos, i.get_data())
+            xPos = xPos+1
+        
+        xPos = xPos+1   
+        for i in self.parent.questions:
+            yPos = 0
+            worksheet.write(yPos, xPos, i.get_question())
+            yPos = 1
+            for n in i.get_data():
+                worksheet.write(yPos, xPos, n)
+                yPos = yPos+1
+            xPos = xPos+1
+		
+ 
+
+        workbook.save("exports/" + self.file_name_box.text() + ".xls")
+        
+        self.close()

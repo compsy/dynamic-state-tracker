@@ -1,1 +1,0 @@
-/home/oli26/PycharmProjects/DST2/SampleVideo_1280x720_1mb.mp4//1000//How confident were you? - [46.0, 57.0, 31.0, 31.0, 31.0, 31.0]//How scared were you? - [79.0, 29.0, 78.0, 78.0, 78.0, 78.0]//Test question? - [40.0, 99.0, 65.0, 65.0, 65.0, 65.0]//
