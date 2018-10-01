@@ -6,10 +6,11 @@ import sys
 import MediaPlayer
 import Question
 class QuestionsWindow(QMainWindow):
-    def __init__(self, parent=None, current_questions = None):
+    def __init__(self, parent=None, current_questions = None, current_time = None):
         super(QuestionsWindow, self).__init__(parent)
         self.parent = parent
         self.questions = current_questions
+        self.current_time = current_time
         self.question_fields = list()
         self.combo_box_list = list()
 
@@ -73,7 +74,7 @@ class QuestionsWindow(QMainWindow):
         self.layout.addWidget(field,self.number_of_fields,0)
         
         if(self.number_of_fields == 1):
-            self.timeBox = QLineEdit("1000")
+            self.timeBox = QLineEdit(str(self.current_time))
             self.layout.addWidget(self.timeBox,self.number_of_fields,2)
 
         self.add_combo_box(type)

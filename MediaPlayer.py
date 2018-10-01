@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
         QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget)
 from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction, QGridLayout, QLineEdit
 from PyQt5.QtGui import QIcon
+
 import sys
 import threading
 import time
@@ -18,6 +19,8 @@ class MediaPlayer(QMainWindow):
         super(MediaPlayer, self).__init__(parent)
         self.questions = questions 
         self.answered_form = answered_form
+  
+        
   
         self.time = time
         self.setWindowTitle("Dynamic State Tracker 2.0") 
@@ -96,8 +99,6 @@ class MediaPlayer(QMainWindow):
         # Create slider and label
            
         ## ADD INPUT METHOD DEPENDING ON AMOUNT OF QUESTIONS AND TIME
-
-        
         if(len(self.questions) == 1):
                 self.percent_text = QLabel("0")
                 self.slider = QSlider(Qt.Horizontal)
@@ -106,10 +107,12 @@ class MediaPlayer(QMainWindow):
                 self.slider.setTickInterval(10)
                 self.slider.setSingleStep(1)      
                 self.slider.valueChanged.connect(self.value_change)
+                self.slider.setMouseTracking(True)
                 self.type = "one"
                 
                 self.question_text = QLabel(self.questions[0].get_question())
                 layout.addWidget(self.question_text, 3, 0, Qt.AlignCenter)
+                
                 #Create layouts to place slider inside
                 sliderLayout = QHBoxLayout()
                 sliderLayout.setContentsMargins(0, 0, 0, 0)
@@ -167,6 +170,7 @@ class MediaPlayer(QMainWindow):
             self.mediaPlayer.pause()
         else:
             self.mediaPlayer.play()
+            
     def mediaStateChanged(self, state):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
             self.playButton.setIcon(
@@ -195,14 +199,26 @@ class MediaPlayer(QMainWindow):
         self.playButton.setEnabled(False)
         self.errorLabel.setText("Error: " + self.mediaPlayer.errorString())
         
+    def eventFilter(self, source, event):
+        if event.type() == QtCore.QEvent.MouseMove:
+            print("aaaa")
+            
+    def mouseMoveEvent(self, event):
+        size_x = self.slider.geometry().width()
+        new_value = int(100*event.x()/size_x)
+        self.slider.setValue(new_value)
+        #print("event x = " + str(event.x()))
+        #print("size_x = " + str(size_x) + ". new_value = " + str(new_value))
+        
     def record(self):
          if self.type == "one":
+
                 self.questions[0].add_data(self.slider.value())
-                print("recording value: " + str(self.slider.value()))
+                #print("recording value: " + str(self.slider.value()))
          elif self.type == "multi":
                 self.timer.stop()
                 popup = MultiQuestionPopUP(self)
-                print("recrding pop up!")
+                #print("recrding pop up!")
         
 class MultiQuestionPopUP(QMainWindow):
     def __init__(self, parent=None):

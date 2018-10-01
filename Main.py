@@ -29,16 +29,16 @@ class MainWindow(QMainWindow):
         self.time = 1000
         
         # Add the inital question
-        first_question = Question.Question()
-        first_question.set_question("First question")
-        self.questions.append(first_question)
+        #first_question = Question.Question()
+        #first_question.set_question("First question")
+        #self.questions.append(first_question)
         
         # Add basic form
-        self.form_list = list()
+        #self.form_list = list()
         #first_form_quesion = Form.Form()
         #first_form_quesion.set_question("What is your name?")
         #self.form_list.append(first_form_quesion)
-        self.load_form_from_file()
+        self.load_from_file()
 
     def initalize_buttons(self):
         # Create playVideoButton and link to function play_video
@@ -75,7 +75,7 @@ class MainWindow(QMainWindow):
         player.show()
         
     def set_questions(self):
-        window = SetQuestions.QuestionsWindow(self, self.questions)
+        window = SetQuestions.QuestionsWindow(self, self.questions, self.time)
         window.show()
     def import_questions(self, new_questions, new_time):
         self.questions = new_questions
@@ -84,6 +84,19 @@ class MainWindow(QMainWindow):
         except:
             print("invalid time selected, set to default of 1 second")
             self.time = 1000
+            
+
+        try:
+            f = open("saves/Questions_layout/questions.txt", "w+")
+            for q in self.questions:
+                f.write(q.get_question() + "//")
+            f.write("~" + str(new_time))
+            f.close()
+            print("Sucessfully saved!")
+        
+        except:
+            print("Saving failed!")
+    
             
     def set_form(self):
         window = SetForm.SetFormWindow(self, self.form_list)
@@ -111,8 +124,9 @@ class MainWindow(QMainWindow):
             print("Saving failed!")
     
 
-    def load_form_from_file(self):
+    def load_from_file(self):
         new_form_list = list()
+
         f = open("saves/Form_layout/form.txt", "r")
         with f:
             data = f.read()
@@ -123,7 +137,25 @@ class MainWindow(QMainWindow):
                     newFormComponent.set_question(q_text)
                     new_form_list.append(newFormComponent)
         
+        
         self.form_list = new_form_list
+        
+        new_questions_list = list()
+
+        f = open("saves/Questions_layout/questions.txt", "r")
+        with f:
+            data = f.read()
+            segments1 = data.split("~")
+            segments2 = segments1[0].split("//")
+            for q_text in segments2:
+                if (q_text != ""):
+                    newFormComponent = Question.Question()
+                    newFormComponent.set_question(q_text)
+                    new_questions_list.append(newFormComponent)
+                        
+        self.questions = new_questions_list
+        self.time = int(segments1[1])
+
         
 if __name__ == '__main__':
     app = QApplication(sys.argv)
