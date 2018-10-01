@@ -38,6 +38,7 @@ class ReviewWindow(QMainWindow):
         
         self.add_combo_box()
         self.question_index = 0
+        self.fit = "None"
         
         self.add_plot_with_best_fit()
         self.add_other_buttons()
@@ -83,47 +84,61 @@ class ReviewWindow(QMainWindow):
         for q in self.questions:
             self.comboBox.addItem(q.get_question())
 
-        self.comboBox.activated[str].connect(self.set_question)
-        
+        #self.comboBox.activated[str].connect(self.set_question)
+        self.comboBox.activated.connect(self.set_question)
         self.layout.addWidget(self.comboBox, 1, 1)
-    
-    def set_question(self, text):
-         self.question_index = self.comboBox.currentIndex()
+        
+        
+        self.comboBoxDim = QComboBox(self)
+        self.comboBoxDim.addItem("0")
+        self.comboBoxDim.addItem("1")
+        self.comboBoxDim.addItem("2") 
+        self.comboBoxDim.addItem("3") 
+        self.comboBoxDim.addItem("4")     
+
+        self.comboBoxDim.setCurrentIndex(3)
+        self.comboBoxDim.activated.connect(self.set_dimension)
+        self.layout.addWidget(self.comboBoxDim, 2, 1)
+        
+    def set_question(self):
+        self.question_index = self.comboBox.currentIndex()
          
-         self.plot.clear()
-         self.plot.best_fit(2)
+        self.plot.clear()
+        self.fit = self.plot.best_fit(self.comboBoxDim.currentIndex())
          
+    def set_dimension(self):
+        self.plot.clear()
+        self.fit = self.plot.best_fit(self.comboBoxDim.currentIndex())
          
-         
-    def add_plot(self):
-        self.plot = PlotCanvas(self, 5, 4, 100)
-        self.plot.plot()
-        self.layout.addWidget(self.plot, 2, 1)
+    #def add_plot(self):
+    #    self.plot = PlotCanvas(self, 5, 4, 100)
+    #    self.plot.plot()
+    #    self.layout.addWidget(self.plot, 3, 1)
         
     def add_plot_with_best_fit(self):
         self.plot = PlotCanvas(self, 5, 4, 100)
-        self.plot.best_fit(2)
-        self.layout.addWidget(self.plot, 2, 1)
+        self.fit = self.plot.best_fit(self.comboBoxDim.currentIndex())
+        self.layout.addWidget(self.plot, 3, 1)
     
     def add_other_buttons(self):
     
         export_button = QPushButton("Export")
         export_button.clicked.connect(self.write_to_excel)
-        self.layout.addWidget(export_button, 3, 1)
+        self.layout.addWidget(export_button, 4, 1)
         
         stats_button = QPushButton("Statistics")
         stats_button.clicked.connect(self.open_stats_window)
-        self.layout.addWidget(stats_button, 4, 1)
-        
+        self.layout.addWidget(stats_button, 5, 1)
+
         
     def open_stats_window(self):
-        new_window = StatsWindow(self)
+        new_window = StatsWindow(self, self.fit)
         new_window.show()
     def write_to_excel(self, widget):
        window = SaveExcel(self)
         
 class StatsWindow(QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, best_fit = None):
         super(StatsWindow, self).__init__(parent)
         self.parent = parent
         self.layout = QGridLayout()
@@ -138,14 +153,16 @@ class StatsWindow(QMainWindow):
         self.data_mode = QLabel("0")
 
         self.data_range= QLabel("0")
+        
+        self.best_fit = QLabel("best fit: " + self.format_best_fit(best_fit))
 
         self.layout.addWidget(self.data_mean, 0,0)
         self.layout.addWidget(self.data_median, 1,0)        
         self.layout.addWidget(self.data_mode, 2,0)
         self.layout.addWidget(self.data_range, 3,0)      
-
+        self.layout.addWidget(self.best_fit, 4,0)  
         self.update_values()
-        
+      
         
     def update_values(self):
         temp_data = self.parent.questions[self.parent.question_index].get_data()
@@ -153,7 +170,30 @@ class StatsWindow(QMainWindow):
         self.data_median.setText("Median: " + str(statistics.median(temp_data)))
         self.data_mode.setText("Mode: " + str(max(set(temp_data), key=temp_data.count)))
         self.data_range.setText("Range: " + str(max(temp_data) - min(temp_data)))
-
+        
+    def format_best_fit(self, fit):
+        i = len(fit)
+        return_string = ""
+        for part in fit:
+            if( str(part) == "N"):
+                return "None"
+            formatedNumber = int(1000*float(part))/1000
+            
+            if(i == 0):
+                xString = ""
+            else:
+                xString = "x^(" + str(i) + ")"
+            
+            if(return_string == ""):
+                 return_string += str(formatedNumber) + xString
+            else:
+                if(formatedNumber < 0):
+                    return_string += " " + str(formatedNumber) + xString 
+                else:
+                    return_string += " + " + str(formatedNumber) + xString 
+            i = i-1
+        return return_string
+            
         
  
 class PlotCanvas(FigureCanvas):
@@ -185,13 +225,14 @@ class PlotCanvas(FigureCanvas):
         ax = self.figure.add_subplot(111)
         ax.plot(data, 'r-')
         ax.set_title(self.parent.questions[self.parent.question_index].get_question())
-        
-        
-        t = range(1, len(data) + 1)
-        fit = np.poly1d(np.polyfit(t, data, dimension))
-        ax.plot(fit(t))
+        fit = 'None'
+        if(dimension != 0):
+            t = range(1, len(data) + 1)
+            fit = np.poly1d(np.polyfit(t, data, dimension))
+            ax.plot(fit(t))
         
         self.draw()
+        return fit
         
     def clear(self):
         self.axes.clear()
