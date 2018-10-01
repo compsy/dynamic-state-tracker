@@ -32,20 +32,20 @@ class MediaPlayer(QMainWindow):
 
         videoWidget = QVideoWidget()
 
+        
+        # create play button
         self.playButton = QPushButton()
         self.playButton.setEnabled(False)
         self.playButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
         self.playButton.clicked.connect(self.play)
 
         
-    
+        # Create slider for video position
         self.positionSlider = QSlider(Qt.Horizontal)
         self.positionSlider.setRange(0, 0)
         self.positionSlider.sliderMoved.connect(self.setPosition)
 
-        
-
-
+        # Create label to output errors
         self.errorLabel = QLabel()
         self.errorLabel.setSizePolicy(QSizePolicy.Preferred,
                 QSizePolicy.Maximum)
@@ -81,7 +81,6 @@ class MediaPlayer(QMainWindow):
 
         layout = QGridLayout()
         layout.setRowStretch(0,2)
-        #layout.setColumnStretch(1,1)
         layout.setVerticalSpacing(1)
         layout.addWidget(videoWidget,0,0)
         layout.addLayout(controlLayout,1,0)
@@ -147,16 +146,13 @@ class MediaPlayer(QMainWindow):
         size = str(self.slider.value())
         self.percent_text.setText(size)
         
-        
-        
     def openFile(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Open Movie",
                 QDir.homePath())
 
         if fileName != '':
             print (fileName)
-            self.mediaPlayer.setMedia(
-                    QMediaContent(QUrl.fromLocalFile(fileName)))
+            self.mediaPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(fileName)))
             self.playButton.setEnabled(True)
             self.video_dir = fileName
 
@@ -198,17 +194,12 @@ class MediaPlayer(QMainWindow):
     def handleError(self):
         self.playButton.setEnabled(False)
         self.errorLabel.setText("Error: " + self.mediaPlayer.errorString())
-        
-    def eventFilter(self, source, event):
-        if event.type() == QtCore.QEvent.MouseMove:
-            print("aaaa")
-            
+
     def mouseMoveEvent(self, event):
         size_x = self.slider.geometry().width()
         new_value = int(100*event.x()/size_x)
         self.slider.setValue(new_value)
-        #print("event x = " + str(event.x()))
-        #print("size_x = " + str(size_x) + ". new_value = " + str(new_value))
+
         
     def record(self):
          if self.type == "one":
