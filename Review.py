@@ -224,12 +224,16 @@ class PlotCanvas(FigureCanvas):
         data = self.parent.questions[self.parent.question_index].get_data()
         ax = self.figure.add_subplot(111)
         ax.plot(data, 'r-')
-        ax.set_title(self.parent.questions[self.parent.question_index].get_question())
+        ax.set_title(self.parent.questions[self.parent.question_index].get_question() + ". Time (" + self.parent.time_interval + " ms)")
         fit = 'None'
         if(dimension != 0):
             t = range(1, len(data) + 1)
             fit = np.poly1d(np.polyfit(t, data, dimension))
             ax.plot(fit(t))
+            
+        
+
+        #plt.ylabel('')
         
         self.draw()
         return fit

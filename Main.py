@@ -23,23 +23,24 @@ class MainWindow(QMainWindow):
         # Initalize all buttons on main menu
         self.initalize_buttons()
    
+        # Initalize author text
+        self.initalize_tag()
    
-        # Initalize Questions list
-        self.questions = list()
+        # Initalise time
         self.time = 1000
         
-        # Add the inital question
-        #first_question = Question.Question()
-        #first_question.set_question("First question")
-        #self.questions.append(first_question)
-        
-        # Add basic form
-        #self.form_list = list()
-        #first_form_quesion = Form.Form()
-        #first_form_quesion.set_question("What is your name?")
-        #self.form_list.append(first_form_quesion)
+        # Tries to load form and question formats, else it creates a new blank list.
         self.load_from_file()
 
+        
+    def initalize_tag(self):
+        titleLabel = QLabel("By Oliver Holder", self)
+        titleLabel.move(90,270)
+        #titleLabel.setAlignment(PyQt5.QtCore.Qt.AlignCenter)
+        
+        
+        
+        
     def initalize_buttons(self):
         # Create playVideoButton and link to function play_video
         self.playVideoButton = QPushButton("Play Video", self)
