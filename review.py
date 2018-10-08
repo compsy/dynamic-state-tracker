@@ -1,246 +1,284 @@
-
-import gi
+import PyQt5 
+from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
+        QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget)
+from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction, QComboBox, QGridLayout, QLineEdit
+import sys
 import json
-
-gi.require_version('Gtk', '3.0')
-from gi.repository import GLib, Gtk, GObject
-
-
-gi.require_version('GdkX11', '3.0')
-
-import question
+import Question
+import Form
+ 
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
+import numpy as np
 import statistics
 
-# MATLAB dependancies
-import matplotlib
-from matplotlib import pyplot
-from matplotlib.backends.backend_gtk3agg import (
-    FigureCanvasGTK3Agg as FigureCanvas)
-
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
-
-import numpy as np
-class ReviewWindow(Gtk.Window):
-    def __init__(self, parent, save_directory):
-        self.parent = parent
-        Gtk.Window.__init__(self, title="Review")
-        self.main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-
-        last_part_of_path = save_directory.split("/")
-        last_part_of_path = last_part_of_path[len(last_part_of_path) - 1].split(".")
+class ReviewWindow(QMainWindow):
+    def __init__(self, parent=None, file_name=None):
+        super(ReviewWindow, self).__init__(parent)
+        
         self.questions = list()
-        self.active_question = 0
-        self.active_method = 0
-
-        self.title = Gtk.Label(last_part_of_path[0] + "\n\n\n")
-        self.main_box.add(self.title)
-        self.add(self.main_box)
-
-        self.load_from_file(save_directory)
-
-        ## SELECT QUESTION
-        self.question_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-
-        question_label = Gtk.Label("Select a question to review!")
-        self.question_box.pack_start(question_label, False, False, 0)
-        name_store = Gtk.ListStore(int, str)
-        for i in range(0, len(self.questions)):
-            name_store.append([1, self.questions[i].get_question()])
-
-        
-        question_combo = Gtk.ComboBox.new_with_model_and_entry(name_store)
-        question_combo.set_entry_text_column(1)
-        question_combo.connect("changed", self.update_question)
-        self.question_box.pack_start(question_combo, False, False, 0)
-        self.main_box.add(self.question_box)
-
-	  
-       ## ADD METHODs
-				
-        self.data_box = Gtk.Box()
-        self.method_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        self.button_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-		
-        method_mean = Gtk.Label("Mean: ")
-        self.data_mean = Gtk.Label("0")
-        box_mean = Gtk.Box()
-
-        method_median = Gtk.Label("Median: ")
-        self.data_median = Gtk.Label("0")
-        box_median = Gtk.Box()
-		
-        method_mode = Gtk.Label("Mode: ")
-        self.data_mode = Gtk.Label("0")
-        box_mode = Gtk.Box()
-		
-        method_range = Gtk.Label("Range: ")
-        self.data_range= Gtk.Label("0")
-        box_range = Gtk.Box()
-		
-        box_mean.pack_start(method_mean, False, False, 0)
-        box_mean.pack_start(self.data_mean, False, False, 0)
-        box_median.pack_start(method_median, False, False, 0)
-        box_median.pack_start(self.data_median, False, False, 0)
-        box_mode.pack_start(method_mode, False, False, 0)
-        box_mode.pack_start(self.data_mode, False, False, 0)
-        box_range.pack_start(method_range, False, False, 0)
-        box_range.pack_start(self.data_range, False, False, 0)
-		
-        self.method_box.add(box_mean)
-        self.method_box.add(box_median)
-        self.method_box.add(box_mode)
-        self.method_box.add(box_range)
-		
-        self.data_box.add(self.method_box)
-        
-        self.main_box.add(self.data_box)
-        self.update_values()
-		
-        
-        ## Add 
-        
-        self.data_box.add(self.button_box)
-        
-        self.plot_button = Gtk.Button.new_with_label("Plot")
-        self.plot_button.connect("clicked", self.plot_new)
-        self.button_box.pack_end(self.plot_button, False, False, 0)
-       
-        self.plot_button = Gtk.Button.new_with_label("Plot with best fit")
-        self.plot_button.connect("clicked", self.plot_best_new)
-        self.button_box.pack_end(self.plot_button, False, False, 0)
-       
-        self.export_button = Gtk.Button.new_with_label("Export to excel")
-        self.export_button.connect("clicked", self.write_to_excel)
-        self.button_box.pack_end(self.export_button, False, False, 0)
-        self.show_all()
+        self.form_list = list()
+        self.load_file(file_name)
         
         
-       
+        self.layout = QGridLayout()
+        self.main_widget = QWidget()
+        self.setCentralWidget(self.main_widget) 
+        self.main_widget.setLayout(self.layout)
+        
+        # Create DST title label
+        titleLabel = QLabel("DST 2.0 : Review", self)
+        self.layout.addWidget(titleLabel, 0, 1)
 
-    def load_from_file(self, dir):
-        file = open(dir, "r")
+        
+        self.add_combo_box()
+        self.question_index = 0
+        self.fit = "None"
+        
+        self.add_plot_with_best_fit()
+        self.add_other_buttons()
+        
+    def load_file(self, file_name):
+        f = open(file_name, 'r')
+        with f:
+            data = f.read()
+            self.load_data(data)
 
-        whole_file_string = file.read()
-        segments = whole_file_string.split("//")
-
-        self.video_dir = segments[0]
-        self.time_interval = segments[1]
-        for i in range(2, len(segments)-1):
-            partition = segments[i].split(" - ")
+    def load_data(self, data):
+        split_between_question_and_form_data = data.split("~")
+        
+        question_segments = split_between_question_and_form_data[0].split("//")
+        form_segments =  split_between_question_and_form_data[1].split("//")
+        
+        
+        self.video_dir = question_segments[0]
+        self.time_interval = question_segments[1]
+        for i in range(2, len(question_segments)-1):
+           
+            partition = question_segments[i].split(" - ")
             temp_data = json.loads(partition[1])
-            temp_question = question.Question()
+            temp_question = Question.Question()
             temp_question.set_question(partition[0])
             temp_question.set_data(temp_data)
             self.questions.append(temp_question)
+            
+            
+        for i in range(0, len(form_segments)-1):
+            partition = form_segments[i].split(" - ")
+            temp_form = Form.Form()
+            temp_form.set_question(partition[0])
+            temp_form.set_data(partition[1])
+            self.form_list.append(temp_form)
+            
+        print("Load complete!")
+        
+    
+    def add_combo_box(self):
+        self.comboBox = QComboBox(self)
+        
+        for q in self.questions:
+            self.comboBox.addItem(q.get_question())
 
+        self.comboBox.activated.connect(self.set_question)
+        self.layout.addWidget(self.comboBox, 1, 1)
+        
+        
+        self.comboBoxDim = QComboBox(self)
+        self.comboBoxDim.addItem("0")
+        self.comboBoxDim.addItem("1")
+        self.comboBoxDim.addItem("2") 
+        self.comboBoxDim.addItem("3") 
+        self.comboBoxDim.addItem("4")     
 
+        self.comboBoxDim.setCurrentIndex(3)
+        self.comboBoxDim.activated.connect(self.set_dimension)
+        self.layout.addWidget(self.comboBoxDim, 2, 1)
+        
+    def set_question(self):
+        self.question_index = self.comboBox.currentIndex()
+         
+        self.plot.clear()
+        self.fit = self.plot.best_fit(self.comboBoxDim.currentIndex())
+         
+    def set_dimension(self):
+        self.plot.clear()
+        self.fit = self.plot.best_fit(self.comboBoxDim.currentIndex())
+         
+        
+    def add_plot_with_best_fit(self):
+        self.plot = PlotCanvas(self, 5, 4, 100)
+        self.fit = self.plot.best_fit(self.comboBoxDim.currentIndex())
+        self.layout.addWidget(self.plot, 3, 1)
+    
+    def add_other_buttons(self):
+    
+        export_button = QPushButton("Export")
+        export_button.clicked.connect(self.write_to_excel)
+        self.layout.addWidget(export_button, 4, 1)
+        
+        stats_button = QPushButton("Statistics")
+        stats_button.clicked.connect(self.open_stats_window)
+        self.layout.addWidget(stats_button, 5, 1)
 
-    def update_question(self, widget):
-        self.active_question = widget.get_active()
-        self.update_values()
-
-    def update_values(self):
-        temp_data = self.questions[self.active_question].get_data()
-        self.data_mean.set_text(str(sum(temp_data)/len(temp_data)))
-        self.data_median.set_text(str(statistics.median(temp_data)))
-        self.data_mode.set_text(str(max(set(temp_data), key=temp_data.count)))
-        self.data_range.set_text(str(max(temp_data) - min(temp_data)))
-		
-		
+        
+    def open_stats_window(self):
+        new_window = StatsWindow(self, self.fit)
+        new_window.show()
     def write_to_excel(self, widget):
+       window = SaveExcel(self)
+        
+class StatsWindow(QMainWindow):
+    def __init__(self, parent=None, best_fit = None):
+        super(StatsWindow, self).__init__(parent)
+        self.parent = parent
+        self.layout = QGridLayout()
+        self.main_widget = QWidget()
+        self.setCentralWidget(self.main_widget) 
+        self.main_widget.setLayout(self.layout)
+
+        self.data_mean = QLabel("0")
+
+        self.data_median = QLabel("0")
+
+        self.data_mode = QLabel("0")
+
+        self.data_range= QLabel("0")
+        
+        self.best_fit = QLabel("best fit: " + self.format_best_fit(best_fit))
+
+        self.layout.addWidget(self.data_mean, 0,0)
+        self.layout.addWidget(self.data_median, 1,0)        
+        self.layout.addWidget(self.data_mode, 2,0)
+        self.layout.addWidget(self.data_range, 3,0)      
+        self.layout.addWidget(self.best_fit, 4,0)  
+        self.update_values()
+      
+        
+    def update_values(self):
+        temp_data = self.parent.questions[self.parent.question_index].get_data()
+        self.data_mean.setText("Mean: " + str(sum(temp_data)/len(temp_data)))
+        self.data_median.setText("Median: " + str(statistics.median(temp_data)))
+        self.data_mode.setText("Mode: " + str(max(set(temp_data), key=temp_data.count)))
+        self.data_range.setText("Range: " + str(max(temp_data) - min(temp_data)))
+        
+    def format_best_fit(self, fit):
+        i = len(fit)
+        return_string = ""
+        for part in fit:
+            if( str(part) == "N"):
+                return "None"
+            formatedNumber = int(1000*float(part))/1000
+            
+            if(i == 0):
+                xString = ""
+            else:
+                xString = "x^(" + str(i) + ")"
+            
+            if(return_string == ""):
+                 return_string += str(formatedNumber) + xString
+            else:
+                if(formatedNumber < 0):
+                    return_string += " " + str(formatedNumber) + xString 
+                else:
+                    return_string += " + " + str(formatedNumber) + xString 
+            i = i-1
+        return return_string
+            
+        
+ 
+class PlotCanvas(FigureCanvas):
+ 
+    def __init__(self, parent=None, width=5, height=4, dpi=100):
+        self.parent = parent
+        fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = fig.add_subplot(111)
+ 
+        FigureCanvas.__init__(self, fig)
+        self.setParent(parent)
+ 
+        FigureCanvas.setSizePolicy(self,
+                QSizePolicy.Expanding,
+                QSizePolicy.Expanding)
+        FigureCanvas.updateGeometry(self)
+
+ 
+ 
+    def plot(self):
+        data = self.parent.questions[self.parent.question_index].get_data()
+        ax = self.figure.add_subplot(111)
+        ax.plot(data, 'r-')
+        ax.set_title(self.parent.questions[self.parent.question_index].get_question())
+        self.draw()
+        
+    def best_fit(self, dimension):
+        data = self.parent.questions[self.parent.question_index].get_data()
+        ax = self.figure.add_subplot(111)
+        ax.plot(data, 'r-')
+        ax.set_title(self.parent.questions[self.parent.question_index].get_question() + ". Time (" + self.parent.time_interval + " ms)")
+        fit = 'None'
+        if(dimension != 0):
+            t = range(1, len(data) + 1)
+            fit = np.poly1d(np.polyfit(t, data, dimension))
+            ax.plot(fit(t))
+            
+        
+
+        #plt.ylabel('')
+        
+        self.draw()
+        return fit
+        
+    def clear(self):
+        self.axes.clear()
+        
+        
+        
+class SaveExcel(QMainWindow):
+     def __init__(self, parent=None):
+        super(SaveExcel, self).__init__(parent)
+
+        
+        
+        self.parent = parent
+        self.layout = QGridLayout()
+        self.main_widget = QWidget()
+        self.setCentralWidget(self.main_widget) 
+        self.main_widget.setLayout(self.layout)
+        
+        self.file_name_box = QLineEdit("File name here")
+        self.layout.addWidget(self.file_name_box, 0, 0)
+        
+        self.save_button = QPushButton("Save file")
+        self.save_button.clicked.connect(self.save)
+        self.layout.addWidget(self.save_button, 0, 1)
+        
+        self.show()
+     def save(self):
         import xlwt
 		
         workbook = xlwt.Workbook()
         worksheet = workbook.add_sheet("my sheet")
 		
-        yPos = 0
-        for i in self.questions:
-            xPos = 0
+ 
+        xPos = 0        
+        for i in self.parent.form_list:
+            worksheet.write(0, xPos, i.get_question())
+            worksheet.write(1, xPos, i.get_data())
+            xPos = xPos+1
+        
+        xPos = xPos+1   
+        for i in self.parent.questions:
+            yPos = 0
             worksheet.write(yPos, xPos, i.get_question())
-            xPos = 1
+            yPos = 1
             for n in i.get_data():
                 worksheet.write(yPos, xPos, n)
-                xPos = xPos+1
-            yPos = yPos+1
+                yPos = yPos+1
+            xPos = xPos+1
 		
-        workbook.save("text.xls")
-		
-    def plot_new(self, widget):
-        temp_data = self.questions[self.active_question].get_data()	
-        pyplot.subplot(211)
-        pyplot.plot(temp_data)	
-        pyplot.title(self.questions[self.active_question].get_question())
-        pyplot.show()
-		
-    def plot_best_new(self, widget):
-        dimension = 2
-		
-        temp_data = self.questions[self.active_question].get_data()	
-        pyplot.subplot(211)
-        pyplot.plot(temp_data)	
-		
-		
-        t = range(1, len(temp_data) + 1)
-        fit = np.poly1d(np.polyfit(t, temp_data, dimension))
-        format_fit = str(fit).replace('\n', '')
+ 
+
+        workbook.save("exports/" + self.file_name_box.text() + ".xls")
         
-        pyplot.subplot(211)
-        pyplot.plot(fit(t))
-		
-        pyplot.gcf().text(0.02, 0.25, format_fit, fontsize = 14)
-        
-        pyplot.title(self.questions[self.active_question].get_question())
-        pyplot.show()
-		
-        
-    def plot(self, temp_data):
-        win = Gtk.Window()
-        win.set_default_size(1000, 1000)
-        win.set_title(self.questions[self.active_question].get_question())
-
-        f = Figure(figsize=(5, 4), dpi=100)
-        a = f.add_subplot(111)
-        s = temp_data
-
-        a.plot(s)
-        a.set_xlabel("Time(x)")
-        a.set_ylabel("Input(y)")
-        sw = Gtk.ScrolledWindow()
-        win.add(sw)
-        # A scrolled window border goes outside the scrollbars and viewport
-        sw.set_border_width(10)
-        canvas = FigureCanvas(f)  # a Gtk.DrawingArea
-        sw.add_with_viewport(canvas)
-
-        win.show_all()
-
-    def best_fit(self, temp_data, dimension):
-
-        f = Figure(figsize=(5, 4), dpi=100)
-        a = f.add_subplot(111)
-        s = temp_data
-        t = range(1, len(temp_data) + 1)
-        fit = np.poly1d(np.polyfit(t, s, dimension))
-        format_fit = str(fit).replace('\n', '')
-        win = Gtk.Window()
-        win.set_default_size(1000, 1000)
-        title = self.questions[self.active_question].get_question() + "(y = %s)" % format_fit
-        win.set_title(title)
-
-
-        a.plot(s)
-        a.plot(fit(t))
-        a.set_xlabel("Time(x)")
-        a.set_ylabel("Input(y)")
-        sw = Gtk.ScrolledWindow()
-        win.add(sw)
-        # A scrolled window border goes outside the scrollbars and viewport
-        sw.set_border_width(10)
-        canvas = FigureCanvas(f)  # a Gtk.DrawingArea
-        canvas.set_size_request(800, 600)
-        sw.add_with_viewport(canvas)
-
-        win.show_all()
-
-
+        self.close()

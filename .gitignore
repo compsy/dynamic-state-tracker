@@ -1,6 +1,4 @@
-*venv/*
-venv/*
-*.idea/*
-.idea/*
-*.mp4
 *.pyc
+*.xls
+output
+saves/*

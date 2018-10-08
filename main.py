@@ -1,106 +1,176 @@
-import gi
-import select_file
-import player
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
-gi.require_version('GdkX11', '3.0')
-import question
-import settings
-import review
-class MainWindow(Gtk.Window):
-    def __init__(self):
-        Gtk.Window.__init__(self, title="Dynamic State Tracker")
-        self.selected_file = None
-        self.questions = list()
-        self.time_interval = 100
+import PyQt5 
+from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
+        QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget)
+from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction
+import sys
+import MediaPlayer
+import SetQuestions
+import Review
+import Question
+import SetForm
+import Form
+import FormWindow
 
+class MainWindow(QMainWindow):
+    def __init__(self, parent=None):
+        super(MainWindow, self).__init__(parent)
+        
+        # Create DST title label
+        titleLabel = QLabel("DST 2.0", self)
+        titleLabel.move(50,25)
+        titleLabel.setAlignment(PyQt5.QtCore.Qt.AlignCenter)
+        
+        # Initalize all buttons on main menu
+        self.initalize_buttons()
+   
+        # Initalize author text
+        self.initalize_tag()
+   
+        # Initalise time
+        self.time = 1000
+        
+        # Tries to load form and question formats, else it creates a new blank list.
+        self.load_from_file()
+  
+    def initalize_tag(self):
+        titleLabel = QLabel("By Oliver Holder", self)
+        titleLabel.move(90,270)
+            
+    def initalize_buttons(self):
+        # Create playVideoButton and link to function open questions form
+        self.playVideoButton = QPushButton("Play Video", self)
+        self.playVideoButton.move(50,80)
+        self.playVideoButton.setEnabled(True)
+        self.playVideoButton.clicked.connect(self.open_question_form)
 
-        first_question = question.Question()
-        first_question.question = "How confident were you?"
-        first_question.type = "slider"
-        self.questions.append(first_question)
+        # Create setQuestionsButton and link to function set_questions
+        self.setQuestionsButton = QPushButton("Set Questions", self)
+        self.setQuestionsButton.move(50,130)
+        self.setQuestionsButton.setEnabled(True)
+        self.setQuestionsButton.clicked.connect(self.set_questions)
+        
+        # Create setFormButton and link to function set_form
+        self.setFormButton = QPushButton("Set Form", self)
+        self.setFormButton.move(50,180)
+        self.setFormButton.setEnabled(True)
+        self.setFormButton.clicked.connect(self.set_form)
 
-        second_question = question.Question()
-        second_question.question = "How scared were you?"
-        second_question.type = "slider"
-        self.questions.append(second_question)
-
-
-        self.draw_area = Gtk.DrawingArea()
-        self.draw_area.set_size_request(10, 50)
-
-        # Create and assign action to start button
-        self.start_button = Gtk.Button("        Start        ")
-        self.start_button.connect("clicked", self.start)
-
-        # Create and assign action to select video button
-        self.select_video_button = Gtk.Button("Select video")
-        self.select_video_button.connect("clicked", self.select_video)
-
-        # Create and assign action to question settings button
-        self.question_settings_button = Gtk.Button("Set questions")
-        self.question_settings_button.connect("clicked", self.question_settings)
-
-        self.analyse_button = Gtk.Button("Analyse Data")
-        self.analyse_button.connect("clicked", self.analyse_data)
-
-        # Create gtk box and pack all buttons into it. This box is at the bottom of the application
-        self.hbox = Gtk.Box(spacing=6)
-        self.hbox.pack_start(self.start_button, True, True, 0)
-        self.hbox.pack_start(self.select_video_button, True, True, 0)
-        self.hbox.pack_start(self.question_settings_button, True, True, 0)
-        self.hbox.pack_start(self.analyse_button, True, True, 0)
-
-        # Create gtk box containing title and video selected information and the gtk box above
-        self.vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        self.vbox.pack_start(Gtk.Label("Dynamic State Tracker"), True, True, 0)
-        self.selected_label = Gtk.Label("Video selected: ")
-        self.vbox.pack_start(self.selected_label, True, True, 0)
-        self.add(self.vbox)
-        self.vbox.pack_start(self.draw_area, True, True, 0)
-        self.vbox.pack_start(self.hbox, False, False, 0)
-
-
-    def start(self, widget):
-        # Check to see if any file is selected (still need to check if file is a video file)
-        if self.selected_file is None:
-            print("Failed: No file selected")
+        # Create reviewButton and link to function review
+        self.reviewButton = QPushButton("Review", self)
+        self.reviewButton.move(50,230)
+        self.reviewButton.setEnabled(True)
+        self.reviewButton.clicked.connect(self.review)
+    
+    def open_question_form(self):
+        '''
+            This function either asks the form questions, for forwards straight to the video player if there are no form questions.
+        '''
+        if(len(self.form_list) == 0):
+            self.video_player(list())
         else:
-            print("Opening " + self.selected_file)
-
-            window = player.PlayerWindow(self.selected_file, self.questions, self.time_interval)
-            window.setup_objects_and_events()
+            form_window = FormWindow.FormWindow(self, self.form_list)
+            form_window.show()
+    
+    def video_player(self, answered_form):
+        player = MediaPlayer.MediaPlayer(self, self.questions, self.time, answered_form)
+        player.show()
+        
+    def set_questions(self):
+        window = SetQuestions.QuestionsWindow(self, self.questions, self.time)
+        window.show()
+        
+    def import_questions(self, new_questions, new_time):
+        '''
+            This function saves questions after they have been changed in the "set questions" window. 
+            It saves both to the current questions in the program and to the file that holds the questions.
+        '''
+        self.questions = new_questions
+        try:
+            self.time = int(new_time)
+        except:
+            print("invalid time selected, set to default of 1 second")
+            self.time = 1000
+            
+        try:
+            f = open("saves/Questions_layout/questions.txt", "w+")
+            for q in self.questions:
+                f.write(q.get_question() + "//")
+            f.write("~" + str(new_time))
+            f.close()
+            print("Sucessfully saved!")
+        
+        except:
+            print("Saving failed!")
+       
+    def set_form(self):
+        window = SetForm.SetFormWindow(self, self.form_list)
+        window.show()
+        
+    def review(self):
+        fileName, _ = QFileDialog.getOpenFileName(self,"Open File", "saves","All Files (*);;Python Files (*.py)")
+        if fileName:
+            print(fileName)
+            window = Review.ReviewWindow(self, fileName)
             window.show()
 
-    def select_video(self, widget):
-        print("Selecting video")
-        win = select_file.FileChooserWindow(self, "video")
+    def import_form(self, new_form_list):
+        '''
+            This function saves form questions after they have been set in the "set form" window.
+            This function saves the form layout in both the program and the save file.
+        '''
+        self.form_list = new_form_list
 
+        try:
+            f = open("saves/Form_layout/form.txt", "w+")
+            for q in self.form_list:
+                f.write(q.get_question() + "//")
+            f.close()
+            print("Sucessfully saved!")
+        
+        except:
+            print("Saving failed!")
+    
 
-    def question_settings(self, widget):
-        print("settings to be added")
-        settings_window = settings.SettingsWindow(self, self.questions, self.time_interval)
+    def load_from_file(self):
+        '''
+            This function loads both the form and question lists from their respective save files. If loading fails then they become empty.
+            The form layout is loaded from 'saves/Form_layout/form.txt' and the questions from 'saves/Questions_layout/questions.txt'.
+        '''
+        new_form_list = list()
 
+        f = open("saves/Form_layout/form.txt", "r")
+        with f:
+            data = f.read()
+            segments = data.split("//")
+            for q_text in segments:
+                if (q_text != ""):
+                    newFormComponent = Form.Form()
+                    newFormComponent.set_question(q_text)
+                    new_form_list.append(newFormComponent)
+        
+        
+        self.form_list = new_form_list
+        
+        new_questions_list = list()
 
+        f = open("saves/Questions_layout/questions.txt", "r")
+        with f:
+            data = f.read()
+            segments1 = data.split("~")
+            segments2 = segments1[0].split("//")
+            for q_text in segments2:
+                if (q_text != ""):
+                    newFormComponent = Question.Question()
+                    newFormComponent.set_question(q_text)
+                    new_questions_list.append(newFormComponent)
+                        
+        self.questions = new_questions_list
+        self.time = int(segments1[1])
 
-    def analyse_data(self, widget):
-        win =  select_file.FileChooserWindow(self, "save")
-
-
-    def set_time(self, time):
-        self.time_interval = time
-
-    def update_selected(self, type, new_selected):
-        # This function is used to update the variable and label for selected files.
-        if(type == "video"):
-            self.selected_file = new_selected
-            last_part_of_path = new_selected.split("/")
-            self.selected_label.set_text("Video selected: " + last_part_of_path[len(last_part_of_path)-1])
-        elif(type == "save"):
-            review.ReviewWindow(self, new_selected)
-
-
-# This is the beginning of the application.
-mainWindow = MainWindow()
-mainWindow.show_all()
-Gtk.main()
+        
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    mainWindow= MainWindow()
+    mainWindow.resize(200, 300)
+    mainWindow.show()
+    sys.exit(app.exec_())
