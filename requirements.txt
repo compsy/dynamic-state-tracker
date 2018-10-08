@@ -18,6 +18,7 @@ numpy==1.15.1
 pefile==2018.8.8
 pycparser==2.19
 PyInstaller==3.4
+pynput==1.4
 pyparsing==2.2.1
 PyQt5==5.11.2
 PyQt5-sip==4.19.12

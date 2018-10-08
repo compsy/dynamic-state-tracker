@@ -13,13 +13,15 @@ import time
 import json
 import Form
 
+from pynput.mouse import Controller
+
 class MediaPlayer(QMainWindow):
 
     def __init__(self, parent=None, questions = None, time = None, answered_form = None):
         super(MediaPlayer, self).__init__(parent)
         self.questions = questions 
         self.answered_form = answered_form
-  
+        self.mouse = Controller()
         
   
         self.time = time
@@ -195,17 +197,15 @@ class MediaPlayer(QMainWindow):
         self.playButton.setEnabled(False)
         self.errorLabel.setText("Error: " + self.mediaPlayer.errorString())
 
-    def mouseMoveEvent(self, event):
-        size_x = self.slider.geometry().width()
-        new_value = int(100*event.x()/size_x)
-        self.slider.setValue(new_value)
 
         
     def record(self):
          if self.type == "one":
-
-                self.questions[0].add_data(self.slider.value())
-                #print("recording value: " + str(self.slider.value()))
+                size_x = self.slider.geometry().width()
+                #print(str(self.mouse.position[0]) + " / " + str(size_x))
+                new_value = int(100*self.mouse.position[0]/size_x)
+                self.slider.setValue(new_value)
+                self.questions[0].add_data(new_value)
          elif self.type == "multi":
                 self.timer.stop()
                 popup = MultiQuestionPopUP(self)
