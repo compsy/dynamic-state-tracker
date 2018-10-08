@@ -31,14 +31,13 @@ class MainWindow(QMainWindow):
         
         # Tries to load form and question formats, else it creates a new blank list.
         self.load_from_file()
-
-        
+  
     def initalize_tag(self):
         titleLabel = QLabel("By Oliver Holder", self)
         titleLabel.move(90,270)
             
     def initalize_buttons(self):
-        # Create playVideoButton and link to function play_video
+        # Create playVideoButton and link to function open questions form
         self.playVideoButton = QPushButton("Play Video", self)
         self.playVideoButton.move(50,80)
         self.playVideoButton.setEnabled(True)
@@ -56,7 +55,6 @@ class MainWindow(QMainWindow):
         self.setFormButton.setEnabled(True)
         self.setFormButton.clicked.connect(self.set_form)
 
-        
         # Create reviewButton and link to function review
         self.reviewButton = QPushButton("Review", self)
         self.reviewButton.move(50,230)
@@ -64,8 +62,14 @@ class MainWindow(QMainWindow):
         self.reviewButton.clicked.connect(self.review)
     
     def open_question_form(self):
-        form_window = FormWindow.FormWindow(self, self.form_list)
-        form_window.show()
+        '''
+            This function either asks the form questions, for forwards straight to the video player if there are no form questions.
+        '''
+        if(len(self.form_list) == 0):
+            self.video_player(list())
+        else:
+            form_window = FormWindow.FormWindow(self, self.form_list)
+            form_window.show()
     
     def video_player(self, answered_form):
         player = MediaPlayer.MediaPlayer(self, self.questions, self.time, answered_form)
@@ -74,7 +78,12 @@ class MainWindow(QMainWindow):
     def set_questions(self):
         window = SetQuestions.QuestionsWindow(self, self.questions, self.time)
         window.show()
+        
     def import_questions(self, new_questions, new_time):
+        '''
+            This function saves questions after they have been changed in the "set questions" window. 
+            It saves both to the current questions in the program and to the file that holds the questions.
+        '''
         self.questions = new_questions
         try:
             self.time = int(new_time)
@@ -82,7 +91,6 @@ class MainWindow(QMainWindow):
             print("invalid time selected, set to default of 1 second")
             self.time = 1000
             
-
         try:
             f = open("saves/Questions_layout/questions.txt", "w+")
             for q in self.questions:
@@ -93,13 +101,11 @@ class MainWindow(QMainWindow):
         
         except:
             print("Saving failed!")
-    
-            
+       
     def set_form(self):
         window = SetForm.SetFormWindow(self, self.form_list)
         window.show()
         
-    
     def review(self):
         fileName, _ = QFileDialog.getOpenFileName(self,"Open File", "saves","All Files (*);;Python Files (*.py)")
         if fileName:
@@ -108,6 +114,10 @@ class MainWindow(QMainWindow):
             window.show()
 
     def import_form(self, new_form_list):
+        '''
+            This function saves form questions after they have been set in the "set form" window.
+            This function saves the form layout in both the program and the save file.
+        '''
         self.form_list = new_form_list
 
         try:
@@ -122,6 +132,10 @@ class MainWindow(QMainWindow):
     
 
     def load_from_file(self):
+        '''
+            This function loads both the form and question lists from their respective save files. If loading fails then they become empty.
+            The form layout is loaded from 'saves/Form_layout/form.txt' and the questions from 'saves/Questions_layout/questions.txt'.
+        '''
         new_form_list = list()
 
         f = open("saves/Form_layout/form.txt", "r")

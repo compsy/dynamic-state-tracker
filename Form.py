@@ -1,8 +1,4 @@
-
-
-
 class Form():
-
     def __init__(self):
         self.question = "not set"
         self.data = " "

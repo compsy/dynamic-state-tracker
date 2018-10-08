@@ -26,15 +26,11 @@ class ReviewWindow(QMainWindow):
         self.main_widget = QWidget()
         self.setCentralWidget(self.main_widget) 
         self.main_widget.setLayout(self.layout)
-
-        
         
         # Create DST title label
         titleLabel = QLabel("DST 2.0 : Review", self)
         self.layout.addWidget(titleLabel, 0, 1)
-        
-        
-        
+
         
         self.add_combo_box()
         self.question_index = 0
@@ -84,7 +80,6 @@ class ReviewWindow(QMainWindow):
         for q in self.questions:
             self.comboBox.addItem(q.get_question())
 
-        #self.comboBox.activated[str].connect(self.set_question)
         self.comboBox.activated.connect(self.set_question)
         self.layout.addWidget(self.comboBox, 1, 1)
         
@@ -110,10 +105,6 @@ class ReviewWindow(QMainWindow):
         self.plot.clear()
         self.fit = self.plot.best_fit(self.comboBoxDim.currentIndex())
          
-    #def add_plot(self):
-    #    self.plot = PlotCanvas(self, 5, 4, 100)
-    #    self.plot.plot()
-    #    self.layout.addWidget(self.plot, 3, 1)
         
     def add_plot_with_best_fit(self):
         self.plot = PlotCanvas(self, 5, 4, 100)

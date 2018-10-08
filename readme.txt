@@ -29,3 +29,9 @@ Finally to run the application type 'python main.py' while in the dynamic state 
 To use the stand alone application, you must unzip the file into the directory you want the program. Ensure that the application (main)
 is in the same directory as the saves and exports folder. When using the stand alone application you must use the wmv video format. You can convert
 other formats to wmv using this website : https://www.online-convert.com
+
+
+
+----------------------------------------------------
+
+Ensure that you have the folders 'saves\Form_layout', 'saves\Questions_layout' and  'exports' in the directory of the program!
