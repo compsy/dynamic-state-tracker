@@ -84,7 +84,7 @@ class QuestionsWindow(QMainWindow):
         
         comboBox.addItem("Slider")
         comboBox.addItem("Binary")
-
+        comboBox.model().item(1).setEnabled(False)
         comboBox.setCurrentIndex(type)
 
         

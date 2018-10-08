@@ -36,11 +36,7 @@ class MainWindow(QMainWindow):
     def initalize_tag(self):
         titleLabel = QLabel("By Oliver Holder", self)
         titleLabel.move(90,270)
-        #titleLabel.setAlignment(PyQt5.QtCore.Qt.AlignCenter)
-        
-        
-        
-        
+            
     def initalize_buttons(self):
         # Create playVideoButton and link to function play_video
         self.playVideoButton = QPushButton("Play Video", self)
