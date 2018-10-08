@@ -209,6 +209,7 @@ class MediaPlayer(QMainWindow):
          elif self.type == "multi":
                 self.timer.stop()
                 popup = MultiQuestionPopUP(self)
+                self.play() #Actually pauses, confusingly
                 #print("recrding pop up!")
         
 class MultiQuestionPopUP(QMainWindow):
@@ -221,12 +222,45 @@ class MultiQuestionPopUP(QMainWindow):
         self.setCentralWidget(self.main_widget) 
         self.main_widget.setLayout(self.layout)
         
-        self.temp_label = QLabel("Multi Questions not yet implemented!")
-        self.layout.addWidget(self.temp_label, 0, 0)
+        #self.temp_label = QLabel("Multi Questions not yet implemented!")
+        #self.layout.addWidget(self.temp_label, 0, 0)
+        
+        self.slider_list= list()
+        
+        self.create_question_segments()
+        
+        self.submit_button = QPushButton("Submit")
+        self.submit_button.clicked.connect(self.submit)
+        self.layout.addWidget(self.submit_button, len(self.slider_list)*2, 0)
         
         self.show()
-        self.parent.close()
+        #self.parent.close()    # this is for diabling multi question mode.
         
+    def create_question_segments(self):
+        index = 0
+        for q in self.parent.questions:
+            question = QLabel(q.get_question())
+            slider = QSlider(Qt.Horizontal)
+            slider.setFocusPolicy(Qt.StrongFocus)
+            slider.setTickPosition(QSlider.TicksBothSides)
+            slider.setTickInterval(10)
+            slider.setSingleStep(1)      
+            slider.setMouseTracking(True)
+            self.slider_list.append(slider)
+
+            self.layout.addWidget(question,index,0)
+            self.layout.addWidget(slider, index+1, 0)
+            
+            index = index + 2
+    def submit(self):
+        i = 0
+        for q in self.parent.questions:
+            q.add_data(self.slider_list[i].value())
+            i = i + 1
+        
+        
+        self.parent.play() #Restarts player
+        self.close()
 class SaveFileWindow(QMainWindow):
      def __init__(self, parent=None):
         super(SaveFileWindow, self).__init__(parent)
