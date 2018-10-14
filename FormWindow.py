@@ -25,37 +25,45 @@ class FormWindow(QMainWindow):
        
         
     def initalize_buttons(self):
+        '''
+            Initalizes the submit button and links it to the submit function.
+        '''
         self.submitButton = QPushButton("Submit", self)
         self.submitButton.setEnabled(True)
         self.submitButton.clicked.connect(self.submit_form)
 
         self.layout.addWidget(self.submitButton,0,0)
         
-    def step_add(self):
-        self.add_question("Not set")
-        
     def initalize_questions(self):
-        
+        '''
+            For every questions in the form, add an answer field.
+        '''
         for q in self.form_list:
-            self.add_question(q.get_question(),1)
+            self.add_answer(q.get_question(),1)
             
     
     
-    def add_question(self, text = None, type = 0):
-        question = QLabel(text)
+    def add_answer(self, text = None, type = 0):
+        '''
+            Adds a question into the window, if there is no text provided the question is set to "Failed to load.". Also inserts an answer box for each question.
+        '''
+        if(text == None):
+            question = QLabel("Failed to load.")
+        else:
+            question = QLabel(text)
         field = QLineEdit(self)
-        field.setText("answer..")
+        field.setText("answer...")
 
         self.question_fields.append(field)
         self.number_of_fields = self.number_of_fields+1
         self.layout.addWidget(question,self.number_of_fields,0)
         self.layout.addWidget(field,self.number_of_fields,1)
         
-
-    def how_many_questions(self):
-        print ( len(self.question_fields))
     
     def submit_form(self):
+        '''
+            Opens the player and sends it the answered questions as a list.
+        '''
         self.answered_form = list()
         for i in range(0, len(self.question_fields)):
             newFormComponent = Form.Form()
@@ -63,7 +71,6 @@ class FormWindow(QMainWindow):
             newFormComponent.set_data(self.question_fields[i].text())
             self.answered_form.append(newFormComponent)
 
-        #self.parent.import_form(self.new_form_list)
         self.parent.video_player(self.answered_form)
         self.close()
    

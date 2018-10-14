@@ -21,20 +21,19 @@ class MediaPlayer(QMainWindow):
         super(MediaPlayer, self).__init__(parent)
         self.questions = questions 
         self.answered_form = answered_form
+        # Controller component is needed to track mouse while it is not clicked.
         self.mouse = Controller()
         
   
         self.time = time
         self.setWindowTitle("Dynamic State Tracker 2.0") 
-        #self.resize(500, 800)
+        # The player should be maximised! This is due to how the mouse tracking works.
         self.showMaximized()
         
-        print ("Starting player!")
-        self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
 
+        self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
         videoWidget = QVideoWidget()
 
-        
         # create play button
         self.playButton = QPushButton()
         self.playButton.setEnabled(False)
@@ -222,9 +221,6 @@ class MultiQuestionPopUP(QMainWindow):
         self.setCentralWidget(self.main_widget) 
         self.main_widget.setLayout(self.layout)
         
-        #self.temp_label = QLabel("Multi Questions not yet implemented!")
-        #self.layout.addWidget(self.temp_label, 0, 0)
-        
         self.slider_list= list()
         
         self.create_question_segments()
@@ -234,7 +230,6 @@ class MultiQuestionPopUP(QMainWindow):
         self.layout.addWidget(self.submit_button, len(self.slider_list)*2, 0)
         
         self.show()
-        #self.parent.close()    # this is for diabling multi question mode.
         
     def create_question_segments(self):
         index = 0
@@ -265,8 +260,6 @@ class SaveFileWindow(QMainWindow):
      def __init__(self, parent=None):
         super(SaveFileWindow, self).__init__(parent)
 
-        
-        
         self.parent = parent
         self.layout = QGridLayout()
         self.main_widget = QWidget()
@@ -294,8 +287,8 @@ class SaveFileWindow(QMainWindow):
                 save_string = q.get_question() + " - " + json.dumps(q.get_data())
                 f.write(save_string + "//")
             
-            f.write("~")
-                 
+            # This is the symbol that splits the object.
+            f.write("~")     
             
             for q in self.parent.answered_form:
                 first_text = str(q.get_question())
