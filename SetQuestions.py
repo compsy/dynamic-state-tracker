@@ -69,7 +69,7 @@ class QuestionsWindow(QMainWindow):
             Functionality for both sliders and binary questions is supported here.
         '''
         for q in self.questions:
-            if q.get_type() == "Slider":
+            if q.get_type() == "rating scale":
                 self.add_question(q.get_question(),0)
             elif q.get_type() == "Binary":
                 self.add_question(q.get_question(),1)
@@ -106,8 +106,8 @@ class QuestionsWindow(QMainWindow):
         '''
         comboBox = QComboBox(self)
         
-        comboBox.addItem("Slider")
-        comboBox.addItem("Binary")
+        comboBox.addItem("rating scale")
+        comboBox.addItem("binary")
         comboBox.model().item(1).setEnabled(False)
         comboBox.setCurrentIndex(type)
 

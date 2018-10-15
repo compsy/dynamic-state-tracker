@@ -5,7 +5,7 @@ from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
         QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget)
 from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction, QGridLayout, QLineEdit
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon,QFont
 
 import sys
 import threading
@@ -14,6 +14,8 @@ import json
 import Form
 
 from pynput.mouse import Controller
+
+
 
 class MediaPlayer(QMainWindow):
 
@@ -43,8 +45,15 @@ class MediaPlayer(QMainWindow):
         
         # Create slider for video position
         self.positionSlider = QSlider(Qt.Horizontal)
+        self.positionSlider.setStyleSheet("QSlider::handle:horizontal {background-color: blue; border: 1px solid #777; width 13px; margin-top: -3px; margin-bottom: -3px; border-radius: 2px;}")
         self.positionSlider.setRange(0, 0)
         self.positionSlider.sliderMoved.connect(self.setPosition)
+        
+        # Create label for video position
+        
+        self.positionLabel = QLabel("0")
+        newfont = QFont("Times", 20, QFont.Bold) 
+        self.positionLabel.setFont(newfont)
 
         # Create label to output errors
         self.errorLabel = QLabel()
@@ -63,11 +72,17 @@ class MediaPlayer(QMainWindow):
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(self.exitCall)
 
+        # Create save action
+        saveAction = QAction(QIcon('save.png'), '&Save', self)
+        saveAction.setShortcut('Ctrl+S')
+        saveAction.triggered.connect(self.saveAndExit)
+        
         # Create menu bar and add action
         menuBar = self.menuBar()
         fileMenu = menuBar.addMenu('&File')
         fileMenu.addAction(openAction)
         fileMenu.addAction(exitAction)
+        fileMenu.addAction(saveAction)
 
         # Create a widget for window contents
         wid = QWidget(self)
@@ -78,6 +93,7 @@ class MediaPlayer(QMainWindow):
         controlLayout.setContentsMargins(0, 0, 0, 0)
         controlLayout.addWidget(self.playButton)
         controlLayout.addWidget(self.positionSlider)
+        controlLayout.addWidget(self.positionLabel)
 
         layout = QGridLayout()
         layout.setRowStretch(0,2)
@@ -100,8 +116,12 @@ class MediaPlayer(QMainWindow):
         ## ADD INPUT METHOD DEPENDING ON AMOUNT OF QUESTIONS AND TIME
         if(len(self.questions) == 1):
                 # Initalize slider, initalize type variable for later.
+                
+
+                
                 self.percent_text = QLabel("0")
                 self.slider = QSlider(Qt.Horizontal)
+                self.slider.setStyleSheet("QSlider::handle:horizontal {background-color: red; border: 1px solid #777; width 13px; margin-top: -2px; margin-bottom: -2px; border-radius: 4px;}")
                 self.slider.setFocusPolicy(Qt.StrongFocus)
                 self.slider.setTickPosition(QSlider.TicksBothSides)
                 self.slider.setTickInterval(10)
@@ -112,6 +132,10 @@ class MediaPlayer(QMainWindow):
                 
                 # Creates a label with the asked question, then adds it to the main layout.
                 self.question_text = QLabel(self.questions[0].get_question())
+                newfont = QFont("Times", 20, QFont.Bold) 
+                self.question_text.setFont(newfont)
+
+                
                 layout.addWidget(self.question_text, 3, 0, Qt.AlignCenter)
                 
                 # Create layouts to place slider inside
@@ -159,7 +183,7 @@ class MediaPlayer(QMainWindow):
 
     def exitCall(self):
         print("Exiting!")
-        sys.exit(app.exec_())
+        self.close()
 
             
     def play(self):
@@ -180,15 +204,24 @@ class MediaPlayer(QMainWindow):
             # set timer interval to self.time. This self.time is loaded from the setQuestions settings.    
             self.timer.start(self.time)
         elif self.mediaPlayer.state() == QMediaPlayer.StoppedState:
-            self.timer.stop()
-            save_window = SaveFileWindow(self)
+            self.saveAndExit()
         else:
             self.playButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
             self.timer.stop()
 
     def positionChanged(self, position):
         self.positionSlider.setValue(position)
+        self.positionLabel.setText(self.format_time(self.mediaPlayer.position()))
 
+        
+    def format_time(self, m_seconds):
+        seconds = round(m_seconds/1000)
+        mins = round(seconds / 60) 
+        reduced_seconds = seconds % 60
+        formated_time = str(mins) + ":" + str(reduced_seconds)
+        return formated_time
+        
+        
     def durationChanged(self, duration):
         self.positionSlider.setRange(0, duration)
 
@@ -214,6 +247,12 @@ class MediaPlayer(QMainWindow):
                popup = MultiQuestionPopUP(self)
                self.play() #Actually pauses, confusingly
         
+    def saveAndExit(self):
+        if(self.mediaPlayer.state() == QMediaPlayer.PlayingState):
+            self.play() #Actually pauses.
+        self.timer.stop()
+        save_window = SaveFileWindow(self)
+    
 class MultiQuestionPopUP(QMainWindow):
     def __init__(self, parent=None):
         super(MultiQuestionPopUP, self).__init__(parent)
