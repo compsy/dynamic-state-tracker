@@ -261,7 +261,7 @@ class PlotCanvas(FigureCanvas):
             self.parent.close()
             self.close()
    
-   def clear(self):
+    def clear(self):
         '''
            This clears the plot from the figure.
            Maybe I should just have this used in best_fit? 

@@ -18,19 +18,20 @@ from pynput.mouse import Controller
 class MediaPlayer(QMainWindow):
 
     def __init__(self, parent=None, questions = None, time = None, answered_form = None):
+        # Initalize self and variables
         super(MediaPlayer, self).__init__(parent)
         self.questions = questions 
         self.answered_form = answered_form
+        self.time = time
+        self.setWindowTitle("Dynamic State Tracker 2.0")
+        
         # Controller component is needed to track mouse while it is not clicked.
         self.mouse = Controller()
         
-  
-        self.time = time
-        self.setWindowTitle("Dynamic State Tracker 2.0") 
         # The player should be maximised! This is due to how the mouse tracking works.
         self.showMaximized()
         
-
+        # Create media player and video widget.
         self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
         videoWidget = QVideoWidget()
 
@@ -39,7 +40,6 @@ class MediaPlayer(QMainWindow):
         self.playButton.setEnabled(False)
         self.playButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
         self.playButton.clicked.connect(self.play)
-
         
         # Create slider for video position
         self.positionSlider = QSlider(Qt.Horizontal)
@@ -66,7 +66,6 @@ class MediaPlayer(QMainWindow):
         # Create menu bar and add action
         menuBar = self.menuBar()
         fileMenu = menuBar.addMenu('&File')
-        #fileMenu.addAction(newAction)
         fileMenu.addAction(openAction)
         fileMenu.addAction(exitAction)
 
@@ -201,7 +200,6 @@ class MediaPlayer(QMainWindow):
     def record(self):
          if self.type == "one":
                 size_x = self.slider.geometry().width()
-                #print(str(self.mouse.position[0]) + " / " + str(size_x))
                 new_value = int(100*self.mouse.position[0]/size_x)
                 self.slider.setValue(new_value)
                 self.questions[0].add_data(new_value)
@@ -209,7 +207,6 @@ class MediaPlayer(QMainWindow):
                 self.timer.stop()
                 popup = MultiQuestionPopUP(self)
                 self.play() #Actually pauses, confusingly
-                #print("recrding pop up!")
         
 class MultiQuestionPopUP(QMainWindow):
     def __init__(self, parent=None):
