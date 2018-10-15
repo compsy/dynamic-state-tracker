@@ -34,7 +34,7 @@ class SetFormWindow(QMainWindow):
         # Create AddButton and link to function add_question (through step_add)
         self.addButton = QPushButton("Add", self)
         self.addButton.setEnabled(True)
-        self.addButton.clicked.connect(self.step_add)
+        self.addButton.clicked.connect(self.add_question)
         
         # Create removeButton and link to function remove_question 
         self.removeButton = QPushButton("Remove", self)
@@ -50,9 +50,7 @@ class SetFormWindow(QMainWindow):
         self.layout.addWidget(self.addButton,0,0)
         self.layout.addWidget(self.removeButton,0,1)
         self.layout.addWidget(self.submitButton,0,2)
-        
-    def step_add(self):
-        self.add_question("Not set")
+
         
     def initalize_questions(self):
         '''

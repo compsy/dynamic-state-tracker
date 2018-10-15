@@ -1,7 +1,7 @@
 import PyQt5 
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
         QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget)
-from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction, QComboBox, QGridLayout, QLineEdit
+from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction, QComboBox, QGridLayout, QLineEdit, QHBoxLayout, QCheckBox
 import sys
 import json
 import Question
@@ -30,6 +30,9 @@ class ReviewWindow(QMainWindow):
         titleLabel = QLabel("DST 2.0 : Review", self)
         self.layout.addWidget(titleLabel, 0, 1)
 
+        # Initalize plot.
+        self.plot = PlotCanvas(self, 5, 4, 100)
+        
         # Add both combo boxes to the window.
         self.add_combo_boxes()
         # Set default question to 0 (For graphing purposes).
@@ -38,8 +41,9 @@ class ReviewWindow(QMainWindow):
         self.fit = "None"
         
         # Add the plot to the window.
-        self.add_plot_with_best_fit()
         self.add_other_buttons()
+        self.add_plot_with_best_fit()
+        
         
     def load_file(self, file_name):
         '''
@@ -112,22 +116,19 @@ class ReviewWindow(QMainWindow):
         self.question_index = self.comboBox.currentIndex()
         
         # Clear the current plot and regraph with regard to the new data from the new question.
-        self.plot.clear()
-        self.fit = self.plot.best_fit(self.comboBoxDim.currentIndex())
+        self.replot()
          
     def set_dimension(self):
         '''
             Clear the current plot and reload with new best fit.
         ''' 
-        self.plot.clear()
-        self.fit = self.plot.best_fit(self.comboBoxDim.currentIndex())
+        self.replot()
          
         
     def add_plot_with_best_fit(self):
         '''
             Creates a graph, adds it too the window. Also graphs the data from the first question at the default degree.
         '''
-        self.plot = PlotCanvas(self, 5, 4, 100)
         self.fit = self.plot.best_fit(self.comboBoxDim.currentIndex())
         self.layout.addWidget(self.plot, 3, 1)
     
@@ -142,6 +143,16 @@ class ReviewWindow(QMainWindow):
         stats_button = QPushButton("Statistics")
         stats_button.clicked.connect(self.open_stats_window)
         self.layout.addWidget(stats_button, 5, 1)
+        
+        
+        checkButtonLayout = QHBoxLayout()
+        checkButtonLayout.setContentsMargins(0, 0, 0, 0)
+
+        self.layout.addLayout(checkButtonLayout, 6, 1)
+        
+        self.hide_best_fit = QCheckBox("Hide best fit")
+        self.hide_best_fit.stateChanged.connect(self.replot)
+        checkButtonLayout.addWidget(self.hide_best_fit)
 
     def open_stats_window(self):
         new_window = StatsWindow(self, self.fit)
@@ -150,6 +161,9 @@ class ReviewWindow(QMainWindow):
     def write_to_excel(self, widget):
        window = SaveExcel(self)
         
+    def replot(self):
+        self.plot.clear()
+        self.fit = self.plot.best_fit(self.comboBoxDim.currentIndex())
 class StatsWindow(QMainWindow):
     def __init__(self, parent=None, best_fit = None):
         super(StatsWindow, self).__init__(parent)
@@ -244,19 +258,31 @@ class PlotCanvas(FigureCanvas):
             If the degree is 0, no best fit line will be created. The 'fit' variable will remain as default "None".
             If the plot excepts, then it is most likely the wrong text file was loaded. This prints "Plot crashing!" and closes the review window.
         '''
+
         try:
             data = self.parent.questions[self.parent.question_index].get_data()
             ax = self.figure.add_subplot(111)
             ax.plot(data, 'r-')
             ax.set_title(self.parent.questions[self.parent.question_index].get_question() + ". Time (" + self.parent.time_interval + " ms)")
+            
+            # Initalize fit, incase dimension = 0
             fit = 'None'
-            if(dimension != 0):
-                t = range(1, len(data) + 1)
+            
+            # Create time series (for x values)
+            t = range(1, len(data) + 1)
+             
+            # Create best fit, depending on dimension.
+            if(dimension != 0 and not self.parent.hide_best_fit.isChecked()):
+                
                 fit = np.poly1d(np.polyfit(t, data, dimension))
                 ax.plot(fit(t))
+            
+                
+            # Draw graph.    
             self.draw()
             return fit
         except:
+
             print("Plot crashing!")
             self.parent.close()
             self.close()

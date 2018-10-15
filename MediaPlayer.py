@@ -99,6 +99,7 @@ class MediaPlayer(QMainWindow):
            
         ## ADD INPUT METHOD DEPENDING ON AMOUNT OF QUESTIONS AND TIME
         if(len(self.questions) == 1):
+                # Initalize slider, initalize type variable for later.
                 self.percent_text = QLabel("0")
                 self.slider = QSlider(Qt.Horizontal)
                 self.slider.setFocusPolicy(Qt.StrongFocus)
@@ -109,22 +110,22 @@ class MediaPlayer(QMainWindow):
                 self.slider.setMouseTracking(True)
                 self.type = "one"
                 
+                # Creates a label with the asked question, then adds it to the main layout.
                 self.question_text = QLabel(self.questions[0].get_question())
                 layout.addWidget(self.question_text, 3, 0, Qt.AlignCenter)
                 
-                #Create layouts to place slider inside
+                # Create layouts to place slider inside
                 sliderLayout = QHBoxLayout()
                 sliderLayout.setContentsMargins(0, 0, 0, 0)
                 
+                # Add slider and percent text to slider layout.
                 sliderLayout.addWidget(self.slider)
                 sliderLayout.addWidget(self.percent_text)
                
-                
-                
-                
-                
+                # Add slider layout to the main window layout.
                 layout.addLayout(sliderLayout,4,0)
         elif(len(self.questions) > 1):
+                # Initalize type variable for later.
                 self.type = "multi"
         
         
@@ -168,18 +169,21 @@ class MediaPlayer(QMainWindow):
             self.mediaPlayer.play()
             
     def mediaStateChanged(self, state):
+        '''
+            If media state is changed, this function is called.
+            If the video is playing, the timer is started for recording input.
+            If the video is paused, the timer is stopped.
+            If the video is ended, open the save window and end the timer.
+        '''
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
-            self.playButton.setIcon(
-                    self.style().standardIcon(QStyle.SP_MediaPause))
-                
+            self.playButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPause))
+            # set timer interval to self.time. This self.time is loaded from the setQuestions settings.    
             self.timer.start(self.time)
         elif self.mediaPlayer.state() == QMediaPlayer.StoppedState:
-            print("video ended!")
             self.timer.stop()
             save_window = SaveFileWindow(self)
         else:
-            self.playButton.setIcon(
-                    self.style().standardIcon(QStyle.SP_MediaPlay))
+            self.playButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
             self.timer.stop()
 
     def positionChanged(self, position):
@@ -195,18 +199,20 @@ class MediaPlayer(QMainWindow):
         self.playButton.setEnabled(False)
         self.errorLabel.setText("Error: " + self.mediaPlayer.errorString())
 
-
-        
     def record(self):
-         if self.type == "one":
-                size_x = self.slider.geometry().width()
-                new_value = int(100*self.mouse.position[0]/size_x)
-                self.slider.setValue(new_value)
-                self.questions[0].add_data(new_value)
-         elif self.type == "multi":
-                self.timer.stop()
-                popup = MultiQuestionPopUP(self)
-                self.play() #Actually pauses, confusingly
+        '''
+            This function performs the recording of input. If we are in single question mode, first the slider will update to the mouse, and then it will be recorded.
+            If in multi-question mode, the 'MultiQuestionPopUP' class is used to record the input.
+        '''
+        if self.type == "one":
+               size_x = self.slider.geometry().width()
+               new_value = int(100*self.mouse.position[0]/size_x)
+               self.slider.setValue(new_value)
+               self.questions[0].add_data(new_value)
+        elif self.type == "multi":
+               self.timer.stop()
+               popup = MultiQuestionPopUP(self)
+               self.play() #Actually pauses, confusingly
         
 class MultiQuestionPopUP(QMainWindow):
     def __init__(self, parent=None):
@@ -218,17 +224,21 @@ class MultiQuestionPopUP(QMainWindow):
         self.setCentralWidget(self.main_widget) 
         self.main_widget.setLayout(self.layout)
         
+        # A list to hold all the sliders so we can reference back to them later on submit!
         self.slider_list= list()
         
         self.create_question_segments()
         
         self.submit_button = QPushButton("Submit")
         self.submit_button.clicked.connect(self.submit)
-        self.layout.addWidget(self.submit_button, len(self.slider_list)*2, 0)
+        self.layout.addWidget(self.submit_button, len(self.slider_list)*2, 0) # the position here is multiplied by 2 because each question has a label and slider.
         
         self.show()
         
     def create_question_segments(self):
+        '''
+            Creates all the sliders and questions in the multi-question pop up.
+        '''
         index = 0
         for q in self.parent.questions:
             question = QLabel(q.get_question())
@@ -245,14 +255,18 @@ class MultiQuestionPopUP(QMainWindow):
             
             index = index + 2
     def submit(self):
+        '''
+            Adds data to all the questions when user submits the multi-question window.
+            Then restart the player and close this instance of multi-window.
+        '''
         i = 0
         for q in self.parent.questions:
             q.add_data(self.slider_list[i].value())
             i = i + 1
         
-        
         self.parent.play() #Restarts player
         self.close()
+        
 class SaveFileWindow(QMainWindow):
      def __init__(self, parent=None):
         super(SaveFileWindow, self).__init__(parent)
@@ -273,7 +287,15 @@ class SaveFileWindow(QMainWindow):
         self.show()
 
      def save_file(self):
+        '''
+            Attempts to save file with the name in the text box.
+            Saves both questions and form.
+        '''
         file_name = self.file_name_box.text()
+        
+        # If there is no filename, then do nothing.
+        if (file_name == ""):
+            return 
         
         try:
             f = open("saves/" + file_name + ".txt", "w+")
@@ -293,14 +315,12 @@ class SaveFileWindow(QMainWindow):
                 save_string = first_text + " - " + second_text
                 f.write(save_string + "//")
             
-            
             f.close()
-            print("Sucessfully saved!")
-            
+            print("Sucessfully saved!") 
         except:
             print("Saving failed!")
         
-        exit_window = EndWindow(self, "Goodbye!")
+        exit_window = EndWindow(self, "Thank you and Goodbye!")
     
 class EndWindow(QMainWindow):
     def __init__(self, parent = None, text = None):
@@ -320,6 +340,9 @@ class EndWindow(QMainWindow):
         
         self.show()
     def accept(self):
+        '''
+            Close video player, close save window, close self.
+        '''
         self.parent.parent.close()
         self.parent.close()
         self.close()

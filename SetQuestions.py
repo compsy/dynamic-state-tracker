@@ -46,7 +46,7 @@ class QuestionsWindow(QMainWindow):
         # Create AddButton and link to function add_question (through step_add)
         self.addButton = QPushButton("Add", self)
         self.addButton.setEnabled(True)
-        self.addButton.clicked.connect(self.step_add)
+        self.addButton.clicked.connect(self.add_question)
         
         # Create removeButton and link to function remove_question 
         self.removeButton = QPushButton("Remove", self)
@@ -62,10 +62,7 @@ class QuestionsWindow(QMainWindow):
         self.layout.addWidget(self.addButton,0,0)
         self.layout.addWidget(self.removeButton,0,1)
         self.layout.addWidget(self.submitButton,0,2)
-        
-    def step_add(self):
-        self.add_question("Not set")
-        
+              
     def initalize_questions(self):
         '''
             This function parses over the current question list and adds fields/combo boxes to the window for each current question.
@@ -95,8 +92,10 @@ class QuestionsWindow(QMainWindow):
         
         # Adding of time period box. (This could be done somewhere else, this is kind of ugly.)
         if(self.number_of_fields == 1):
+            time_label = QLabel("Time (in ms)")
             self.timeBox = QLineEdit(str(self.current_time))
-            self.layout.addWidget(self.timeBox,self.number_of_fields,2)
+            self.layout.addWidget(time_label, self.number_of_fields, 2)
+            self.layout.addWidget(self.timeBox,self.number_of_fields+1,2)
 
         self.add_combo_box(type)
  
