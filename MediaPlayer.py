@@ -52,7 +52,7 @@ class MediaPlayer(QMainWindow):
         # Create label for video position
         
         self.positionLabel = QLabel("0")
-        newfont = QFont("Times", 20, QFont.Bold) 
+        newfont = QFont("Times", 20) 
         self.positionLabel.setFont(newfont)
 
         # Create label to output errors
@@ -116,9 +116,6 @@ class MediaPlayer(QMainWindow):
         ## ADD INPUT METHOD DEPENDING ON AMOUNT OF QUESTIONS AND TIME
         if(len(self.questions) == 1):
                 # Initalize slider, initalize type variable for later.
-                
-
-                
                 self.percent_text = QLabel("0")
                 self.slider = QSlider(Qt.Horizontal)
                 self.slider.setStyleSheet("QSlider::handle:horizontal {background-color: red; border: 1px solid #777; width 13px; margin-top: -2px; margin-bottom: -2px; border-radius: 4px;}")
@@ -218,7 +215,11 @@ class MediaPlayer(QMainWindow):
         seconds = round(m_seconds/1000)
         mins = round(seconds / 60) 
         reduced_seconds = seconds % 60
-        formated_time = str(mins) + ":" + str(reduced_seconds)
+        if (reduced_seconds < 10):
+            seconds_str = "0" + str(reduced_seconds)
+        else:
+            seconds_str = str(reduced_seconds)
+        formated_time = str(mins) + ":" + seconds_str
         return formated_time
         
         
