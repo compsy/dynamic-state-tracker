@@ -16,7 +16,7 @@ import statistics
 class ReviewWindow(QMainWindow):
     def __init__(self, parent=None, file_name=None):
         super(ReviewWindow, self).__init__(parent)
-        
+        self.setWindowTitle("Dynamic State Tracker 2.0: Review")
         self.questions = list()
         self.form_list = list()
         self.load_file(file_name)
@@ -97,12 +97,14 @@ class ReviewWindow(QMainWindow):
         
         # 0-4 degrees in the polynomial best fit. 
         self.comboBoxDim = QComboBox(self)
-        self.comboBoxDim.addItem("0")
-        self.comboBoxDim.addItem("1")
-        self.comboBoxDim.addItem("2") 
-        self.comboBoxDim.addItem("3") 
-        self.comboBoxDim.addItem("4")     
+        self.comboBoxDim.addItem("No best fit")
+        self.comboBoxDim.addItem("Best fit (x)")
+        self.comboBoxDim.addItem(f' Best fit (x\N{SUPERSCRIPT TWO})') 
+        self.comboBoxDim.addItem(f' Best fit (x\N{SUPERSCRIPT THREE})') 
+        self.comboBoxDim.addItem(f' Best fit (x\N{SUPERSCRIPT FOUR})')     
 
+        
+         
         # Set default to 3. A cubic.
         self.comboBoxDim.setCurrentIndex(3)
         self.comboBoxDim.activated.connect(self.set_dimension)
@@ -167,6 +169,7 @@ class ReviewWindow(QMainWindow):
 class StatsWindow(QMainWindow):
     def __init__(self, parent=None, best_fit = None):
         super(StatsWindow, self).__init__(parent)
+        self.setWindowTitle("Statistics")
         self.parent = parent
         self.layout = QGridLayout()
         self.main_widget = QWidget()
@@ -306,7 +309,7 @@ class PlotCanvas(FigureCanvas):
 class SaveExcel(QMainWindow):
      def __init__(self, parent=None):
         super(SaveExcel, self).__init__(parent)
-
+        self.setWindowTitle("Export file as:")
         self.parent = parent
         self.layout = QGridLayout()
         self.main_widget = QWidget()

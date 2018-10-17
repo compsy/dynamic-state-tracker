@@ -45,7 +45,7 @@ class MediaPlayer(QMainWindow):
         
         # Create slider for video position
         self.positionSlider = QSlider(Qt.Horizontal)
-        self.positionSlider.setStyleSheet("QSlider::handle:horizontal {background-color: blue; border: 1px solid #777; width 13px; margin-top: -3px; margin-bottom: -3px; border-radius: 2px;}")
+        self.positionSlider.setStyleSheet("QSlider::handle:horizontal {background-color: grey; border: 1px solid #777; width 13px; margin-top: -3px; margin-bottom: -3px; border-radius: 2px;}")
         self.positionSlider.setRange(0, 0)
         self.positionSlider.sliderMoved.connect(self.setPosition)
         
@@ -118,7 +118,7 @@ class MediaPlayer(QMainWindow):
                 # Initalize slider, initalize type variable for later.
                 self.percent_text = QLabel("0")
                 self.slider = QSlider(Qt.Horizontal)
-                self.slider.setStyleSheet("QSlider::handle:horizontal {background-color: red; border: 1px solid #777; width 13px; margin-top: -2px; margin-bottom: -2px; border-radius: 4px;}")
+                self.slider.setStyleSheet("QSlider::handle:horizontal {background-color: blue; border: 1px solid #777; width 13px; margin-top: -2px; margin-bottom: -2px; border-radius: 4px;}")
                 self.slider.setFocusPolicy(Qt.StrongFocus)
                 self.slider.setTickPosition(QSlider.TicksBothSides)
                 self.slider.setTickInterval(10)
@@ -257,7 +257,7 @@ class MediaPlayer(QMainWindow):
 class MultiQuestionPopUP(QMainWindow):
     def __init__(self, parent=None):
         super(MultiQuestionPopUP, self).__init__(parent)
-        
+        self.setWindowTitle("Questions")
         self.parent = parent
         self.layout = QGridLayout()
         self.main_widget = QWidget()
@@ -310,7 +310,7 @@ class MultiQuestionPopUP(QMainWindow):
 class SaveFileWindow(QMainWindow):
      def __init__(self, parent=None):
         super(SaveFileWindow, self).__init__(parent)
-
+        self.setWindowTitle("Save file as:")
         self.parent = parent
         self.layout = QGridLayout()
         self.main_widget = QWidget()
@@ -365,6 +365,7 @@ class SaveFileWindow(QMainWindow):
 class EndWindow(QMainWindow):
     def __init__(self, parent = None, text = None):
         super(EndWindow, self).__init__(parent)
+        self.setWindowTitle("Exit window")
         self.parent = parent
         self.layout = QGridLayout()
         self.main_widget = QWidget()

@@ -8,6 +8,7 @@ import Form
 class FormWindow(QMainWindow):
     def __init__(self, parent=None, form_list = None):
         super(FormWindow, self).__init__(parent)
+        self.setWindowTitle("Dynamic State Tracker 2.0")
         self.parent = parent
         self.form_list = form_list
         self.question_fields = list()

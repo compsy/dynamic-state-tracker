@@ -8,7 +8,7 @@ import Question
 class QuestionsWindow(QMainWindow):
     def __init__(self, parent=None, current_questions = None, current_time = None):
         super(QuestionsWindow, self).__init__(parent)
-        
+        self.setWindowTitle("Set Questions")
         # Save parent for later use in saving questions
         self.parent = parent
         

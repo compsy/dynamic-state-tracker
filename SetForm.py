@@ -9,6 +9,7 @@ import Form
 class SetFormWindow(QMainWindow):
     def __init__(self, parent=None, form_list = None):
         super(SetFormWindow, self).__init__(parent)
+        self.setWindowTitle("Set Form")
         self.parent = parent
         self.video_dir = None
         self.form_list = form_list
