@@ -181,7 +181,7 @@ class StatsWindow(QMainWindow):
         
         # Creates the best fit label, sets its text to the formated best fit.
         self.best_fit = QLabel("best fit: " + self.format_best_fit(best_fit))
-
+        
         # Set all widgets to the layout.
         self.layout.addWidget(self.data_mean, 0,0)
         self.layout.addWidget(self.data_median, 1,0)        
@@ -213,7 +213,6 @@ class StatsWindow(QMainWindow):
         i = len(fit)
         return_string = ""
         for part in fit:
-            print("part: " + str(part))
             # Is the first char is N, it must be "None" so return "None"
             if( str(part) == "N"):
                 return "None"
@@ -223,8 +222,15 @@ class StatsWindow(QMainWindow):
             
             if(i == 0):
                 xString = ""
-            else:
-                xString = "x^(" + str(i) + ")"
+            elif(i == 1):
+                xString = f' x'
+            elif(i == 2):
+                xString = f' x\N{SUPERSCRIPT TWO}'
+            elif(i == 3):
+                xString = f' x\N{SUPERSCRIPT THREE}'
+            elif(i == 4):
+                xString = f' x\N{SUPERSCRIPT FOUR}'
+
             
             if(return_string == ""):
                  return_string += str(formatedNumber) + xString
@@ -262,8 +268,9 @@ class PlotCanvas(FigureCanvas):
         try:
             data = self.parent.questions[self.parent.question_index].get_data()
             ax = self.figure.add_subplot(111)
+            ax.set(xlabel = "Time (" + self.parent.time_interval + " ms)", ylabel = "Rating scale")
             ax.plot(data, 'r-')
-            ax.set_title(self.parent.questions[self.parent.question_index].get_question() + ". Time (" + self.parent.time_interval + " ms)")
+            ax.set_title(self.parent.questions[self.parent.question_index].get_question())
             
             # Initalize fit, incase dimension = 0
             fit = 'None'
