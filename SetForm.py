@@ -6,11 +6,13 @@ from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction, QLineEdit
 import sys
 import MediaPlayer
 import Form
+import MultiLanguage
 class SetFormWindow(QMainWindow):
     def __init__(self, parent=None, form_list = None):
         super(SetFormWindow, self).__init__(parent)
-        self.setWindowTitle("Set Form")
         self.parent = parent
+        self.setWindowTitle(self.parent.MultiLang.find_correct_word("Set Form"))
+        
         self.video_dir = None
         self.form_list = form_list
         self.question_fields = list()
@@ -33,17 +35,17 @@ class SetFormWindow(QMainWindow):
             It then assigned each of their functions and adds them to the layout.
         '''
         # Create AddButton and link to function add_question (through step_add)
-        self.addButton = QPushButton("Add", self)
+        self.addButton = QPushButton(self.parent.MultiLang.find_correct_word("Add"), self)
         self.addButton.setEnabled(True)
         self.addButton.clicked.connect(self.add_question)
         
         # Create removeButton and link to function remove_question 
-        self.removeButton = QPushButton("Remove", self)
+        self.removeButton = QPushButton(self.parent.MultiLang.find_correct_word("Remove"), self)
         self.removeButton.setEnabled(True)
         self.removeButton.clicked.connect(self.remove_question)
   
         # Create submitButton and link to function export_form
-        self.submitButton = QPushButton("Submit", self)
+        self.submitButton = QPushButton(self.parent.MultiLang.find_correct_word("Submit"), self)
         self.submitButton.setEnabled(True)
         self.submitButton.clicked.connect(self.export_form)
         

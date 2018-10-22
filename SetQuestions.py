@@ -5,12 +5,14 @@ from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction, QLineEdit
 import sys
 import MediaPlayer
 import Question
+import MultiLanguage
 class QuestionsWindow(QMainWindow):
     def __init__(self, parent=None, current_questions = None, current_time = None):
         super(QuestionsWindow, self).__init__(parent)
-        self.setWindowTitle("Set Questions")
-        # Save parent for later use in saving questions
         self.parent = parent
+        self.setWindowTitle(self.parent.MultiLang.find_correct_word("Set Questions"))
+        # Save parent for later use in saving questions
+        
         
         # Store current questions from main program in local variable.
         self.questions = current_questions
@@ -44,17 +46,17 @@ class QuestionsWindow(QMainWindow):
             It then assigned each of their functions and adds them to the layout.
         '''
         # Create AddButton and link to function add_question (through step_add)
-        self.addButton = QPushButton("Add", self)
+        self.addButton = QPushButton(self.parent.MultiLang.find_correct_word("Add"), self)
         self.addButton.setEnabled(True)
         self.addButton.clicked.connect(self.add_question)
         
         # Create removeButton and link to function remove_question 
-        self.removeButton = QPushButton("Remove", self)
+        self.removeButton = QPushButton(self.parent.MultiLang.find_correct_word("Remove"), self)
         self.removeButton.setEnabled(True)
         self.removeButton.clicked.connect(self.remove_question)
   
         # Create submitButton and link to function export_questions
-        self.submitButton = QPushButton("Submit", self)
+        self.submitButton = QPushButton(self.parent.MultiLang.find_correct_word("Submit"), self)
         self.submitButton.setEnabled(True)
         self.submitButton.clicked.connect(self.export_questions)
         
@@ -92,7 +94,7 @@ class QuestionsWindow(QMainWindow):
         
         # Adding of time period box. (This could be done somewhere else, this is kind of ugly.)
         if(self.number_of_fields == 1):
-            time_label = QLabel("Time (in ms)")
+            time_label = QLabel(self.parent.MultiLang.find_correct_word("Time") + " (in ms)")
             self.timeBox = QLineEdit(str(self.current_time))
             self.layout.addWidget(time_label, self.number_of_fields, 2)
             self.layout.addWidget(self.timeBox,self.number_of_fields+1,2)

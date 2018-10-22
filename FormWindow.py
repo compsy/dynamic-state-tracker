@@ -5,11 +5,13 @@ from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction, QLineEdit
 import sys
 import MediaPlayer
 import Form
+import MultiLanguage
 class FormWindow(QMainWindow):
     def __init__(self, parent=None, form_list = None):
         super(FormWindow, self).__init__(parent)
-        self.setWindowTitle("Dynamic State Tracker 2.0")
         self.parent = parent
+        self.setWindowTitle("Dynamic State Tracker 2.0")
+
         self.form_list = form_list
         self.question_fields = list()
 
@@ -29,7 +31,7 @@ class FormWindow(QMainWindow):
         '''
             Initalizes the submit button and links it to the submit function.
         '''
-        self.submitButton = QPushButton("Submit", self)
+        self.submitButton = QPushButton(self.parent.MultiLang.find_correct_word("Submit"), self)
         self.submitButton.setEnabled(True)
         self.submitButton.clicked.connect(self.submit_form)
 
@@ -53,7 +55,7 @@ class FormWindow(QMainWindow):
         else:
             question = QLabel(text)
         field = QLineEdit(self)
-        field.setText("answer...")
+        field.setText(self.parent.MultiLang.find_correct_word("answer") + "...")
 
         self.question_fields.append(field)
         self.number_of_fields = self.number_of_fields+1

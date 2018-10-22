@@ -12,11 +12,13 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
 import statistics
+import MultiLanguage
 
 class ReviewWindow(QMainWindow):
     def __init__(self, parent=None, file_name=None):
         super(ReviewWindow, self).__init__(parent)
-        self.setWindowTitle("Dynamic State Tracker 2.0: Review")
+        self.parent = parent
+        self.setWindowTitle("Dynamic State Tracker 2.0: " +self.parent.MultiLang.find_correct_word("Review"))
         self.questions = list()
         self.form_list = list()
         self.load_file(file_name)
@@ -27,7 +29,7 @@ class ReviewWindow(QMainWindow):
         self.main_widget.setLayout(self.layout)
         
         # Create DST title label
-        titleLabel = QLabel("DST 2.0 : Review", self)
+        titleLabel = QLabel("DST 2.0 : " +self.parent.MultiLang.find_correct_word("Review"), self)
         self.layout.addWidget(titleLabel, 0, 1)
 
         # Initalize plot.
@@ -97,11 +99,11 @@ class ReviewWindow(QMainWindow):
         
         # 0-4 degrees in the polynomial best fit. 
         self.comboBoxDim = QComboBox(self)
-        self.comboBoxDim.addItem("No best fit")
-        self.comboBoxDim.addItem("Best fit (x)")
-        self.comboBoxDim.addItem(f' Best fit (x\N{SUPERSCRIPT TWO})') 
-        self.comboBoxDim.addItem(f' Best fit (x\N{SUPERSCRIPT THREE})') 
-        self.comboBoxDim.addItem(f' Best fit (x\N{SUPERSCRIPT FOUR})')     
+        self.comboBoxDim.addItem(self.parent.MultiLang.find_correct_word("No best fit"))
+        self.comboBoxDim.addItem(self.parent.MultiLang.find_correct_word("Best fit") + " (x)")
+        self.comboBoxDim.addItem(self.parent.MultiLang.find_correct_word("Best fit") +f' (x\N{SUPERSCRIPT TWO})') 
+        self.comboBoxDim.addItem(self.parent.MultiLang.find_correct_word("Best fit") +f' (x\N{SUPERSCRIPT THREE})') 
+        self.comboBoxDim.addItem(self.parent.MultiLang.find_correct_word("Best fit") +f' (x\N{SUPERSCRIPT FOUR})')     
 
         
          
@@ -138,11 +140,11 @@ class ReviewWindow(QMainWindow):
         '''
             Add the export and statistics buttons and assigns their click function.
         '''
-        export_button = QPushButton("Export")
+        export_button = QPushButton(self.parent.MultiLang.find_correct_word("Export"))
         export_button.clicked.connect(self.write_to_excel)
         self.layout.addWidget(export_button, 4, 1)
         
-        stats_button = QPushButton("Statistics")
+        stats_button = QPushButton(self.parent.MultiLang.find_correct_word("Statistics"))
         stats_button.clicked.connect(self.open_stats_window)
         self.layout.addWidget(stats_button, 5, 1)
         
@@ -152,7 +154,7 @@ class ReviewWindow(QMainWindow):
 
         self.layout.addLayout(checkButtonLayout, 6, 1)
         
-        self.hide_best_fit = QCheckBox("Hide best fit")
+        self.hide_best_fit = QCheckBox(self.parent.MultiLang.find_correct_word("Hide best fit"))
         self.hide_best_fit.stateChanged.connect(self.replot)
         checkButtonLayout.addWidget(self.hide_best_fit)
 
@@ -169,8 +171,9 @@ class ReviewWindow(QMainWindow):
 class StatsWindow(QMainWindow):
     def __init__(self, parent=None, best_fit = None):
         super(StatsWindow, self).__init__(parent)
-        self.setWindowTitle("Statistics")
         self.parent = parent
+        self.setWindowTitle(self.parent.parent.MultiLang.find_correct_word("Statistics"))
+
         self.layout = QGridLayout()
         self.main_widget = QWidget()
         self.setCentralWidget(self.main_widget) 
@@ -183,7 +186,7 @@ class StatsWindow(QMainWindow):
         self.data_range= QLabel("0")
         
         # Creates the best fit label, sets its text to the formated best fit.
-        self.best_fit = QLabel("best fit: " + self.format_best_fit(best_fit))
+        self.best_fit = QLabel(self.parent.parent.MultiLang.find_correct_word("Best fit") + ": " + self.format_best_fit(best_fit))
         
         # Set all widgets to the layout.
         self.layout.addWidget(self.data_mean, 0,0)
@@ -271,7 +274,8 @@ class PlotCanvas(FigureCanvas):
         try:
             data = self.parent.questions[self.parent.question_index].get_data()
             ax = self.figure.add_subplot(111)
-            ax.set(xlabel = "Time (" + self.parent.time_interval + " ms)", ylabel = "Rating scale")
+            time_str = self.parent.parent.MultiLang.find_correct_word("Time")
+            ax.set(xlabel = time_str + " (" + self.parent.time_interval + " ms)", ylabel = "Rating scale")
             ax.plot(data, 'r-')
             ax.set_title(self.parent.questions[self.parent.question_index].get_question())
             
@@ -319,7 +323,7 @@ class SaveExcel(QMainWindow):
         self.file_name_box = QLineEdit("File name here")
         self.layout.addWidget(self.file_name_box, 0, 0)
         
-        self.save_button = QPushButton("Save file")
+        self.save_button = QPushButton(self.parent.parent.MultiLang.find_correct_word("Save") +  " file")
         self.save_button.clicked.connect(self.save)
         self.layout.addWidget(self.save_button, 0, 1)
         

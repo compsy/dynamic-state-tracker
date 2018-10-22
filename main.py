@@ -2,7 +2,7 @@ import PyQt5
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
         QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget)
-from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction
+from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction, QComboBox
 import sys
 import MediaPlayer
 import SetQuestions
@@ -11,6 +11,7 @@ import Question
 import SetForm
 import Form
 import FormWindow
+import MultiLanguage
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -20,6 +21,9 @@ class MainWindow(QMainWindow):
         titleLabel = QLabel("DST 2.0", self)
         titleLabel.move(50,25)
         titleLabel.setAlignment(PyQt5.QtCore.Qt.AlignCenter)
+        
+        # Create MultiLanguage instance
+        self.MultiLang = MultiLanguage.MultiLanguage("English")
         
         # Initalize all buttons on main menu
         self.initalize_buttons()
@@ -36,35 +40,54 @@ class MainWindow(QMainWindow):
         
         # Add Icon 
         self.setWindowIcon(QtGui.QIcon('logo.png'))
-  
+          
+    def change_language(self, widget):
+        self.MultiLang.set_language(self.languageBox.currentText())
+        
+        # reload all text in main window
+        self.playVideoButton.setText(self.MultiLang.find_correct_word("Play Video"))
+        self.setQuestionsButton.setText(self.MultiLang.find_correct_word("Set Questions"))
+        self.setFormButton.setText(self.MultiLang.find_correct_word("Set Form"))
+        self.reviewButton.setText(self.MultiLang.find_correct_word("Review"))
     def initalize_tag(self):
         titleLabel = QLabel("By Oliver Holder \nand Ruud Hartigh", self)
-        titleLabel.move(90,265)
+        titleLabel.move(90,320)
             
     def initalize_buttons(self):
         # Create playVideoButton and link to function open questions form
-        self.playVideoButton = QPushButton("Play Video", self)
+        self.playVideoButton = QPushButton(self.MultiLang.find_correct_word("Play Video"), self)
         self.playVideoButton.move(50,80)
         self.playVideoButton.setEnabled(True)
         self.playVideoButton.clicked.connect(self.open_question_form)
 
         # Create setQuestionsButton and link to function set_questions
-        self.setQuestionsButton = QPushButton("Set Questions", self)
+        self.setQuestionsButton = QPushButton(self.MultiLang.find_correct_word("Set Questions"), self)
         self.setQuestionsButton.move(50,130)
         self.setQuestionsButton.setEnabled(True)
         self.setQuestionsButton.clicked.connect(self.set_questions)
         
         # Create setFormButton and link to function set_form
-        self.setFormButton = QPushButton("Set Form", self)
+        self.setFormButton = QPushButton(self.MultiLang.find_correct_word("Set Form"), self)
         self.setFormButton.move(50,180)
         self.setFormButton.setEnabled(True)
         self.setFormButton.clicked.connect(self.set_form)
 
         # Create reviewButton and link to function review
-        self.reviewButton = QPushButton("Review", self)
+        self.reviewButton = QPushButton(self.MultiLang.find_correct_word("Review"), self)
         self.reviewButton.move(50,230)
         self.reviewButton.setEnabled(True)
         self.reviewButton.clicked.connect(self.review)
+        
+        
+        # Create language setting
+        self.languageBox = QComboBox(self)
+        
+        self.languageBox.addItem("English")
+        self.languageBox.addItem("Dutch")
+        self.languageBox.setCurrentIndex(0)
+        
+        self.languageBox.move(50,280)
+        self.languageBox.currentIndexChanged.connect(self.change_language)
     
     def open_question_form(self):
         '''
@@ -171,11 +194,14 @@ class MainWindow(QMainWindow):
                         
         self.questions = new_questions_list
         self.time = int(segments1[1])
+    
+    
 
+        
         
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     mainWindow= MainWindow()
-    mainWindow.resize(200, 300)
+    mainWindow.resize(200, 350)
     mainWindow.show()
     sys.exit(app.exec_())
