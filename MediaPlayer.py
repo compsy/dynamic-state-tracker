@@ -15,13 +15,14 @@ import Form
 
 from pynput.mouse import Controller
 
-
+import MultiLanguage
 
 class MediaPlayer(QMainWindow):
 
     def __init__(self, parent=None, questions = None, time = None, answered_form = None):
         # Initalize self and variables
         super(MediaPlayer, self).__init__(parent)
+        self.parent = parent
         self.questions = questions 
         self.answered_form = answered_form
         self.time = time
@@ -360,7 +361,7 @@ class SaveFileWindow(QMainWindow):
         except:
             print("Saving failed!")
         
-        exit_window = EndWindow(self, "Thank you and Goodbye!")
+        exit_window = EndWindow(self, self.parent.parent.MultiLang.find_correct_word("Thank you and goodbye!"))
     
 class EndWindow(QMainWindow):
     def __init__(self, parent = None, text = None):

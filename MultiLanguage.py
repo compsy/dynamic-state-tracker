@@ -9,10 +9,10 @@ class MultiLanguage():
         self.cur_language = lang
         
         ## For Main window 
-        first_word = ["Play Video", "Video afspelen"]
-        second_word = ["Set Questions", "vragen stellen"]
-        third_word = ["Set Form", "Vorm instellen"]
-        fourth_word = ["Review","Beoordeling"]
+        first_word = ["Start Video", "Start Video"]
+        second_word = ["Set items", "Items instellen"]
+        third_word = ["Basic questions", "Basisvragen"]
+        fourth_word = ["Show result","Bekijk resultaten"]
         
         self.word_array.append(first_word)
         self.word_array.append(second_word)
@@ -21,11 +21,12 @@ class MultiLanguage():
         
         
         ## For Review Window
+        # Use trend instead of best fit!
         first_word = ["Export", "Exporteren"]
         second_word = ["Statistics", "Statistieken"]
         third_word = ["Hide best fit", "Geen beste pasvorm"]
-        fourth_word = ["Best fit", "Beste pasvorm"]
-        fifth_word = ["No best fit", "Geen beste pasvorm"]
+        fourth_word = ["Trend", "Trend"]
+        fifth_word = ["No trend", "Geen trend"]
     
         self.word_array.append(first_word)
         self.word_array.append(second_word)
@@ -37,7 +38,7 @@ class MultiLanguage():
         # For add/submit/remove/time
         first_word = ["Add", "Toevoegen"]
         second_word = ["Remove", "Verwijderen"]
-        third_word = ["Submit", "Voorleggen"]
+        third_word = ["Submit", "Klaar"]
         fourth_word = ["Time", "Tijd"]
         
         self.word_array.append(first_word)
@@ -48,9 +49,27 @@ class MultiLanguage():
         # For save/answer
         first_word = ["Save", "Opslaan"]
         second_word = ["answer", "antwoord"]
+        third_word = ["continuous", "continue"]
 
         self.word_array.append(first_word)
         self.word_array.append(second_word)
+        self.word_array.append(third_word)
+        
+        # Statistics 
+        first_word = ["Mean", "Gemiddelde"]
+        second_word = ["Mode", "Modus"]
+        third_word = ["Median", "Mediaan"]
+        fourth_word = ["Range", "Bandbreedte"]
+        
+        self.word_array.append(first_word)
+        self.word_array.append(second_word)
+        self.word_array.append(third_word)
+        self.word_array.append(fourth_word)
+        
+        
+        # Extra
+        first_word = ["Thank you and goodbye!", "Bedankt en tot ziens!"]
+        self.word_array.append(first_word)
     def set_language(self, lang):
         self.cur_language = lang
         

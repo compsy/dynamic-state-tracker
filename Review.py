@@ -99,11 +99,11 @@ class ReviewWindow(QMainWindow):
         
         # 0-4 degrees in the polynomial best fit. 
         self.comboBoxDim = QComboBox(self)
-        self.comboBoxDim.addItem(self.parent.MultiLang.find_correct_word("No best fit"))
-        self.comboBoxDim.addItem(self.parent.MultiLang.find_correct_word("Best fit") + " (x)")
-        self.comboBoxDim.addItem(self.parent.MultiLang.find_correct_word("Best fit") +f' (x\N{SUPERSCRIPT TWO})') 
-        self.comboBoxDim.addItem(self.parent.MultiLang.find_correct_word("Best fit") +f' (x\N{SUPERSCRIPT THREE})') 
-        self.comboBoxDim.addItem(self.parent.MultiLang.find_correct_word("Best fit") +f' (x\N{SUPERSCRIPT FOUR})')     
+        self.comboBoxDim.addItem(self.parent.MultiLang.find_correct_word("No trend"))
+        self.comboBoxDim.addItem(self.parent.MultiLang.find_correct_word("Trend") + " (x)")
+        self.comboBoxDim.addItem(self.parent.MultiLang.find_correct_word("Trend") +f' (x\N{SUPERSCRIPT TWO})') 
+        self.comboBoxDim.addItem(self.parent.MultiLang.find_correct_word("Trend") +f' (x\N{SUPERSCRIPT THREE})') 
+        self.comboBoxDim.addItem(self.parent.MultiLang.find_correct_word("Trend") +f' (x\N{SUPERSCRIPT FOUR})')     
 
         
          
@@ -154,7 +154,7 @@ class ReviewWindow(QMainWindow):
 
         self.layout.addLayout(checkButtonLayout, 6, 1)
         
-        self.hide_best_fit = QCheckBox(self.parent.MultiLang.find_correct_word("Hide best fit"))
+        self.hide_best_fit = QCheckBox(self.parent.MultiLang.find_correct_word("No trend"))
         self.hide_best_fit.stateChanged.connect(self.replot)
         checkButtonLayout.addWidget(self.hide_best_fit)
 
@@ -186,7 +186,7 @@ class StatsWindow(QMainWindow):
         self.data_range= QLabel("0")
         
         # Creates the best fit label, sets its text to the formated best fit.
-        self.best_fit = QLabel(self.parent.parent.MultiLang.find_correct_word("Best fit") + ": " + self.format_best_fit(best_fit))
+        self.best_fit = QLabel(self.parent.parent.MultiLang.find_correct_word("Trend") + ": " + self.format_best_fit(best_fit))
         
         # Set all widgets to the layout.
         self.layout.addWidget(self.data_mean, 0,0)
@@ -205,10 +205,10 @@ class StatsWindow(QMainWindow):
             This is really only used as an initalization function (Because it looks neater).
         '''
         temp_data = self.parent.questions[self.parent.question_index].get_data()
-        self.data_mean.setText("Mean: " + str(sum(temp_data)/len(temp_data)))
-        self.data_median.setText("Median: " + str(statistics.median(temp_data)))
-        self.data_mode.setText("Mode: " + str(max(set(temp_data), key=temp_data.count)))
-        self.data_range.setText("Range: " + str(max(temp_data) - min(temp_data)))
+        self.data_mean.setText(self.parent.parent.MultiLang.find_correct_word("Mean") + ": " + str(sum(temp_data)/len(temp_data)))
+        self.data_median.setText(self.parent.parent.MultiLang.find_correct_word("Median") + ": " + str(statistics.median(temp_data)))
+        self.data_mode.setText(self.parent.parent.MultiLang.find_correct_word("Mode") + ": " + str(max(set(temp_data), key=temp_data.count)))
+        self.data_range.setText(self.parent.parent.MultiLang.find_correct_word("Range")+ ": " + str(max(temp_data) - min(temp_data)))
         
     def format_best_fit(self, fit):
         '''
@@ -267,7 +267,7 @@ class PlotCanvas(FigureCanvas):
     def best_fit(self, dimension):
         '''
             Sets the figure in PlotCanvas. Creates a graph using the question selected and the degree selected.
-            If the degree is 0, no best fit line will be created. The 'fit' variable will remain as default "None".
+            If the degree is 0, no trend line will be created. The 'fit' variable will remain as default "None".
             If the plot excepts, then it is most likely the wrong text file was loaded. This prints "Plot crashing!" and closes the review window.
         '''
 

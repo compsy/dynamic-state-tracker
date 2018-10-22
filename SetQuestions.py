@@ -71,7 +71,7 @@ class QuestionsWindow(QMainWindow):
             Functionality for both sliders and binary questions is supported here.
         '''
         for q in self.questions:
-            if q.get_type() == "rating scale":
+            if q.get_type() == "continuous":
                 self.add_question(q.get_question(),0)
             elif q.get_type() == "Binary":
                 self.add_question(q.get_question(),1)
@@ -109,7 +109,7 @@ class QuestionsWindow(QMainWindow):
         '''
         comboBox = QComboBox(self)
         
-        comboBox.addItem("rating scale")
+        comboBox.addItem(self.parent.MultiLang.find_correct_word("continuous"))
         comboBox.addItem("binary")
         comboBox.model().item(1).setEnabled(False)
         comboBox.setCurrentIndex(type)
@@ -143,7 +143,13 @@ class QuestionsWindow(QMainWindow):
         for i in range(0, len(self.question_fields)):
             newQuestion = Question.Question()
             newQuestion.set_question(self.question_fields[i].text())
-            newQuestion.set_type(self.combo_box_list[i].currentText())
+            
+            string_type = self.combo_box_list[i].currentText()
+            if(string_type == self.parent.MultiLang.find_correct_word("continuous") ):
+                 newQuestion.set_type("continuous")
+            
+           
+            
             self.new_questions.append(newQuestion)
         
 
