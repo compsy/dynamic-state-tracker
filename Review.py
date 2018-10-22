@@ -29,7 +29,7 @@ class ReviewWindow(QMainWindow):
         self.main_widget.setLayout(self.layout)
         
         # Create DST title label
-        titleLabel = QLabel("DST 2.0 : " +self.parent.MultiLang.find_correct_word("Review"), self)
+        titleLabel = QLabel("DST 2.0 : " +self.parent.MultiLang.find_correct_word("Show result"), self)
         self.layout.addWidget(titleLabel, 0, 1)
 
         # Initalize plot.

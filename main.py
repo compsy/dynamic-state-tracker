@@ -54,6 +54,7 @@ class MainWindow(QMainWindow):
         titleLabel.move(80,320)
             
     def initalize_buttons(self):
+
         # Create playVideoButton and link to function open questions form
         self.playVideoButton = QPushButton(self.MultiLang.find_correct_word("Start Video"), self)
         self.playVideoButton.move(50,80)
@@ -84,6 +85,8 @@ class MainWindow(QMainWindow):
         
         self.languageBox.addItem("English")
         self.languageBox.addItem("Dutch")
+        self.languageBox.addItem("French")
+        self.languageBox.addItem("Spanish")
         self.languageBox.setCurrentIndex(0)
         
         self.languageBox.move(50,280)
