@@ -1,4 +1,5 @@
 import PyQt5 
+from PyQt5 import QtGui
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
         QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget)
 from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction
@@ -31,10 +32,14 @@ class MainWindow(QMainWindow):
         
         # Tries to load form and question formats, else it creates a new blank list.
         self.load_from_file()
+        
+        
+        # Add Icon 
+        self.setWindowIcon(QtGui.QIcon('logo.png'))
   
     def initalize_tag(self):
-        titleLabel = QLabel("By Oliver Holder", self)
-        titleLabel.move(90,270)
+        titleLabel = QLabel("By Oliver Holder \nand Ruud Hartigh", self)
+        titleLabel.move(90,265)
             
     def initalize_buttons(self):
         # Create playVideoButton and link to function open questions form

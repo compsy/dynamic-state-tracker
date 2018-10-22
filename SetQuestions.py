@@ -97,6 +97,7 @@ class QuestionsWindow(QMainWindow):
             self.layout.addWidget(time_label, self.number_of_fields, 2)
             self.layout.addWidget(self.timeBox,self.number_of_fields+1,2)
 
+            
         self.add_combo_box(type)
  
     def add_combo_box(self, type):

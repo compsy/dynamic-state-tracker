@@ -18,7 +18,7 @@ class SetFormWindow(QMainWindow):
         self.number_of_fields = 0
 
         self.layout = QGridLayout()
-
+          
         self.main_widget = QWidget()
         self.setCentralWidget(self.main_widget) 
         self.main_widget.setLayout(self.layout)
@@ -49,8 +49,8 @@ class SetFormWindow(QMainWindow):
         
         # Add each button to the layout.
         self.layout.addWidget(self.addButton,0,0)
-        self.layout.addWidget(self.removeButton,0,1)
-        self.layout.addWidget(self.submitButton,0,2)
+        self.layout.addWidget(self.removeButton,1,0)
+        self.layout.addWidget(self.submitButton,2,0)
 
         
     def initalize_questions(self):
@@ -74,7 +74,8 @@ class SetFormWindow(QMainWindow):
             field.setText(text)
         self.question_fields.append(field)
         self.number_of_fields = self.number_of_fields+1
-        self.layout.addWidget(field,self.number_of_fields,0)
+        self.layout.addWidget(field,3+self.number_of_fields,0)
+      
         
 
     def remove_question(self):
