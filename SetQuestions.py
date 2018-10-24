@@ -151,9 +151,7 @@ class QuestionsWindow(QMainWindow):
             string_type = self.combo_box_list[i].currentText()
             if(string_type == self.parent.MultiLang.find_correct_word("continuous") ):
                  newQuestion.set_type("continuous")
-            
-           
-            
+
             self.new_questions.append(newQuestion)
         
 

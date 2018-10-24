@@ -227,7 +227,7 @@ class StatsWindow(QMainWindow):
             This is really only used as an initalization function (Because it looks neater).
         '''
         temp_data = self.parent.questions[self.parent.question_index].get_data()
-        self.data_mean.setText(self.parent.parent.MultiLang.find_correct_word("Mean") + ": " + str(sum(temp_data)/len(temp_data)))
+        self.data_mean.setText(self.parent.parent.MultiLang.find_correct_word("Mean") + ": " + str(round(sum(temp_data)/len(temp_data), 3)))
         self.data_median.setText(self.parent.parent.MultiLang.find_correct_word("Median") + ": " + str(statistics.median(temp_data)))
         self.data_mode.setText(self.parent.parent.MultiLang.find_correct_word("Mode") + ": " + str(max(set(temp_data), key=temp_data.count)))
         self.data_range.setText(self.parent.parent.MultiLang.find_correct_word("Range")+ ": " + str(max(temp_data) - min(temp_data)))
@@ -245,9 +245,7 @@ class StatsWindow(QMainWindow):
             if( str(part) == "N"):
                 return "None"
                 
-            # Ugly rounding to 3dp.
-            formatedNumber = int(1000*float(part))/1000
-            
+            formatedNumber = round(float(part), 3)
             if(i == 0):
                 xString = ""
             elif(i == 1):
