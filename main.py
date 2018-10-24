@@ -54,31 +54,33 @@ class MainWindow(QMainWindow):
         titleLabel.move(80,320)
             
     def initalize_buttons(self):
-
         # Create playVideoButton and link to function open questions form
         self.playVideoButton = QPushButton(self.MultiLang.find_correct_word("Start Video"), self)
-        self.playVideoButton.move(50,80)
+        self.playVideoButton.move(15,80)
         self.playVideoButton.setEnabled(True)
         self.playVideoButton.clicked.connect(self.open_question_form)
+        self.playVideoButton.setStyleSheet ('font: bold 14px;min-width: 10em;padding: 0px;') 
 
         # Create setQuestionsButton and link to function set_questions
         self.setQuestionsButton = QPushButton(self.MultiLang.find_correct_word("Set items"), self)
-        self.setQuestionsButton.move(50,130)
+        self.setQuestionsButton.move(15,130)
         self.setQuestionsButton.setEnabled(True)
         self.setQuestionsButton.clicked.connect(self.set_questions)
+        self.setQuestionsButton.setStyleSheet ('font: bold 14px;min-width: 10em;padding: 0px;') 
         
         # Create setFormButton and link to function set_form
         self.setFormButton = QPushButton(self.MultiLang.find_correct_word("Basic questions"), self)
-        self.setFormButton.move(50,180)
+        self.setFormButton.move(15,180)
         self.setFormButton.setEnabled(True)
         self.setFormButton.clicked.connect(self.set_form)
+        self.setFormButton.setStyleSheet ('font: bold 14px;min-width: 10em;padding: 0px;') 
 
         # Create reviewButton and link to function review
         self.reviewButton = QPushButton(self.MultiLang.find_correct_word("Show result"), self)
-        self.reviewButton.move(50,230)
+        self.reviewButton.move(15,230)
         self.reviewButton.setEnabled(True)
         self.reviewButton.clicked.connect(self.review)
-        
+        self.reviewButton.setStyleSheet ('font: bold 14px;min-width: 10em;padding: 0px;') 
         
         # Create language setting
         self.languageBox = QComboBox(self)

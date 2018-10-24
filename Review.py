@@ -10,6 +10,7 @@ import Form
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import numpy as np
 import statistics
 import MultiLanguage
@@ -156,7 +157,21 @@ class ReviewWindow(QMainWindow):
         
         self.hide_best_fit = QCheckBox(self.parent.MultiLang.find_correct_word("No trend"))
         self.hide_best_fit.stateChanged.connect(self.replot)
-        checkButtonLayout.addWidget(self.hide_best_fit)
+        checkButtonLayout.addWidget(self.hide_best_fit, 0)
+        
+        self.add_grid = QCheckBox(self.parent.MultiLang.find_correct_word("Grid"))
+        self.add_grid.stateChanged.connect(self.replot)
+        checkButtonLayout.addWidget(self.add_grid, 1)
+        
+        self.plot_all = QCheckBox("Plot all")
+        self.plot_all.stateChanged.connect(self.replot)
+        checkButtonLayout.addWidget(self.plot_all, 3)
+        if(len(self.questions) == 1):
+            self.plot_all.setEnabled(False)
+        
+        self.set_to_histo = QCheckBox("Histogram")
+        self.set_to_histo.stateChanged.connect(self.replot)
+        checkButtonLayout.addWidget(self.set_to_histo, 2)
 
     def open_stats_window(self):
         new_window = StatsWindow(self, self.fit)
@@ -167,7 +182,14 @@ class ReviewWindow(QMainWindow):
         
     def replot(self):
         self.plot.clear()
-        self.fit = self.plot.best_fit(self.comboBoxDim.currentIndex())
+        if (self.set_to_histo.isChecked()):
+            self.plot.histogram()
+        elif (self.plot_all.isChecked()):
+            self.plot.plot_all()
+        else:
+            self.fit = self.plot.best_fit(self.comboBoxDim.currentIndex())
+        
+        
 class StatsWindow(QMainWindow):
     def __init__(self, parent=None, best_fit = None):
         super(StatsWindow, self).__init__(parent)
@@ -291,6 +313,8 @@ class PlotCanvas(FigureCanvas):
                 fit = np.poly1d(np.polyfit(t, data, dimension))
                 ax.plot(fit(t))
             
+            if(self.parent.add_grid.isChecked()):
+                ax.grid()
                 
             # Draw graph.    
             self.draw()
@@ -300,7 +324,45 @@ class PlotCanvas(FigureCanvas):
             print("Plot crashing!")
             self.parent.close()
             self.close()
-   
+            
+    def histogram(self):
+        try:
+            data = self.parent.questions[self.parent.question_index].get_data()
+            ax = self.figure.add_subplot(111)
+            ax.hist(data, bins = 10)
+            ax.set(xlabel = "User input by 10's", ylabel = "Amount")
+            tick_val = [0,10,20,30,40,50,60,70,80,90,100]
+            ax.set_xticks(tick_val)
+            ax.set_title("Histogram:" + self.parent.questions[self.parent.question_index].get_question())
+            self.draw()
+            return None
+        except:
+            print("Histo crashing!")
+            self.parent.close()
+            self.close()
+            
+            
+    def plot_all(self):
+        colors = ["red", "blue", "green", "black", "purple", "yellow", "pink"]
+        legend_list = list()
+        i = 0
+        for question in self.parent.questions:
+            ax = self.figure.add_subplot(111)
+            ax.plot(question.get_data(), c = colors[i])
+            legend_list.append(mpatches.Patch(color = colors[i], label=question.get_question()))
+            i = i +1
+        
+        if(self.parent.add_grid.isChecked()):
+                ax.grid()
+        ax.set_title("All questions")
+        time_str = self.parent.parent.MultiLang.find_correct_word("Time")
+        ax.set(xlabel = time_str + " (" + self.parent.time_interval + " ms)", ylabel = "Rating scale")
+        
+        # Add legend
+        ax.legend(handles = legend_list)
+        #Draw graphs 
+        self.draw()
+        
     def clear(self):
         '''
            This clears the plot from the figure.

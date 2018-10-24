@@ -83,6 +83,10 @@ class QuestionsWindow(QMainWindow):
             This is a function to add questions segments to the window. It will take a text input to assign the question, or set it to "Not set" if there is no input.
             If it is adding the first field, it will add a time_period box too.
         '''
+        if(self.number_of_fields == 7):
+            print("7 is max number of questions!")
+            return
+        
         field = QLineEdit(self)
         if(not text):
             field.setText("Not set")

@@ -79,19 +79,19 @@ class MultiLanguage():
         for word in self.word_array:
             if(word[0] == eng_word):
                 return word[1]
-        return "None"
+        return eng_word
         
     def find_spanish(self, eng_word):
         for word in self.word_array:
             if(word[0] == eng_word):
                 return word[3]
-        return "None"
+        return eng_word
         
     def find_french(self, eng_word):
         for word in self.word_array:
             if(word[0] == eng_word):
                 return word[2]
-        return "None"     
+        return eng_word     
 
         
     def find_correct_word(self, eng_word):
