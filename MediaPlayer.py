@@ -175,6 +175,10 @@ class MediaPlayer(QMainWindow):
         self.timer = QTimer()
         self.timer.timeout.connect(self.record)
         
+        #For mouse smoothness
+        self.auto_mouse_timer = QTimer()
+        self.auto_mouse_timer.timeout.connect(self.update_mouse)
+        
         # Add error label to layout
         layout.addWidget(self.errorLabel)
 
@@ -183,6 +187,7 @@ class MediaPlayer(QMainWindow):
     def closeEvent(self, event):
         print ("Closing")
         self.timer.stop()
+        self.auto_mouse_timer.stop()
         self.close()
         
     def value_change(self):
@@ -222,11 +227,13 @@ class MediaPlayer(QMainWindow):
             self.playButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPause))
             # set timer interval to self.time. This self.time is loaded from the setQuestions settings.    
             self.timer.start(self.time)
+            self.auto_mouse_timer.start(50)
         elif self.mediaPlayer.state() == QMediaPlayer.StoppedState:
             self.saveAndExit()
         else:
             self.playButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
             self.timer.stop()
+            self.auto_mouse_timer.stop
 
     def positionChanged(self, position):
         self.positionSlider.setValue(position)
@@ -255,6 +262,12 @@ class MediaPlayer(QMainWindow):
         self.playButton.setEnabled(False)
         self.errorLabel.setText("Error: " + self.mediaPlayer.errorString())
 
+    def update_mouse(self):
+        if self.type == "one":
+            size_x = self.slider.geometry().width()
+            new_value = int(100*self.mouse.position[0]/size_x)
+            self.slider.setValue(new_value)
+        
     def record(self):
         '''
             This function performs the recording of input. If we are in single question mode, first the slider will update to the mouse, and then it will be recorded.

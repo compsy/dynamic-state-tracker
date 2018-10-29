@@ -417,6 +417,18 @@ class SaveExcel(QMainWindow):
             xPos = xPos+1
         
         xPos = xPos+1   
+        
+        # Add in time stamps for data
+        if(not len(self.parent.questions) == 0):
+            worksheet.write(0, xPos, self.parent.parent.MultiLang.find_correct_word("Time") + "(in ms)")
+            time_index = 1
+            for n in self.parent.questions[0].get_data():
+                worksheet.write(time_index, xPos, str(int(time_index)*int(self.parent.time_interval)))
+                time_index = time_index+1
+                
+                
+        # Add in data        
+        xPos = xPos+1           
         for i in self.parent.questions:
             yPos = 0
             worksheet.write(yPos, xPos, i.get_question())

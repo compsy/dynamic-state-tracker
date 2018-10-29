@@ -89,6 +89,7 @@ class MainWindow(QMainWindow):
         self.languageBox.addItem("Nederlands")
         self.languageBox.addItem("Français")
         self.languageBox.addItem("Español")
+        self.languageBox.addItem("Deutsche")
         self.languageBox.setCurrentIndex(0)
         
         self.languageBox.move(50,280)
