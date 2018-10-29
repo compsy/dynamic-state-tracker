@@ -132,15 +132,35 @@ class MediaPlayer(QMainWindow):
                 self.question_text = QLabel(self.questions[0].get_question())
                 newfont = QFont("Times", 20, QFont.Bold) 
                 self.question_text.setFont(newfont)
-
+                layout.addWidget(self.question_text,3,0, Qt.AlignCenter)
                 
-                layout.addWidget(self.question_text, 3, 0, Qt.AlignCenter)
+                # Labels for the extremes
+                max_label = QLabel(self.parent.MultiLang.find_correct_word("Very much"))
+                min_label = QLabel(self.parent.MultiLang.find_correct_word("Not at all"))
+                
+                newfont = QFont("Times", 16, QFont.Bold) 
+                max_label.setFont(newfont)
+                min_label.setFont(newfont)
+                
+                
+                textLayout = QHBoxLayout()
+                textLayout.setContentsMargins(0, 0, 0 ,0)
+                
+             
+                textLayout.addWidget(min_label,0, Qt.AlignLeft)
+                textLayout.addWidget(max_label,0, Qt.AlignRight)
+                
+                
+                layout.addLayout(textLayout, 5, 0)
+                
                 
                 # Create layouts to place slider inside
                 sliderLayout = QHBoxLayout()
                 sliderLayout.setContentsMargins(0, 0, 0, 0)
                 
                 # Add slider and percent text to slider layout.
+         
+       
                 sliderLayout.addWidget(self.slider)
                 sliderLayout.addWidget(self.percent_text)
                
@@ -174,8 +194,9 @@ class MediaPlayer(QMainWindow):
                 QDir.homePath())
 
         if fileName != '':
-            print (fileName)
+            print ("Loading url: " + fileName)
             self.mediaPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(fileName)))
+            print ("Loading Qurl: " + str(QUrl.fromLocalFile(fileName)))
             self.playButton.setEnabled(True)
             self.video_dir = fileName
 
@@ -290,6 +311,10 @@ class MultiQuestionPopUP(QMainWindow):
             slider.setSingleStep(1)      
             slider.setMouseTracking(True)
             self.slider_list.append(slider)
+            
+            last_value = q.last_value()
+            if (last_value != None):     
+                slider.setValue(last_value)
 
             self.layout.addWidget(question,index,0)
             self.layout.addWidget(slider, index+1, 0)

@@ -157,22 +157,33 @@ class ReviewWindow(QMainWindow):
         
         self.hide_best_fit = QCheckBox(self.parent.MultiLang.find_correct_word("No trend"))
         self.hide_best_fit.stateChanged.connect(self.replot)
-        checkButtonLayout.addWidget(self.hide_best_fit, 0)
+        checkButtonLayout.addWidget(self.hide_best_fit)
         
         self.add_grid = QCheckBox(self.parent.MultiLang.find_correct_word("Grid"))
         self.add_grid.stateChanged.connect(self.replot)
-        checkButtonLayout.addWidget(self.add_grid, 1)
+        checkButtonLayout.addWidget(self.add_grid)
+        
+          
+        self.set_to_histo = QCheckBox("Histogram")
+        self.set_to_histo.stateChanged.connect(self.replot)
+        checkButtonLayout.addWidget(self.set_to_histo)
         
         self.plot_all = QCheckBox("Plot all")
         self.plot_all.stateChanged.connect(self.replot)
-        checkButtonLayout.addWidget(self.plot_all, 3)
+        checkButtonLayout.addWidget(self.plot_all)
         if(len(self.questions) == 1):
             self.plot_all.setEnabled(False)
-        
-        self.set_to_histo = QCheckBox("Histogram")
-        self.set_to_histo.stateChanged.connect(self.replot)
-        checkButtonLayout.addWidget(self.set_to_histo, 2)
+      
+        if(len(self.questions) > 2):
+            self.state_space = QPushButton("State space")
+            self.state_space.clicked.connect(self.open_state_space)
+            checkButtonLayout.addWidget(self.state_space)
+      
 
+      
+    def open_state_space(self):
+        new_window = StateSpaceWindow(self)
+        
     def open_stats_window(self):
         new_window = StatsWindow(self, self.fit)
         new_window.show()
@@ -361,6 +372,7 @@ class PlotCanvas(FigureCanvas):
         #Draw graphs 
         self.draw()
         
+
     def clear(self):
         '''
            This clears the plot from the figure.
@@ -416,3 +428,59 @@ class SaveExcel(QMainWindow):
 		
         workbook.save("exports/" + self.file_name_box.text() + ".xls")
         self.close()
+        
+class StateSpaceWindow(QMainWindow):
+     def __init__(self, parent=None):
+        super(StateSpaceWindow, self).__init__(parent)
+        self.setWindowTitle("Chose data to create state space")
+        self.parent = parent
+        self.questions = parent.questions
+        self.layout = QGridLayout()
+        self.main_widget = QWidget()
+        self.setCentralWidget(self.main_widget) 
+        self.main_widget.setLayout(self.layout)
+        
+        # Create question box and add each loaded question into it.
+        self.comboBox1 = QComboBox(self)
+        for q in self.questions:
+            self.comboBox1.addItem(q.get_question())
+
+        self.layout.addWidget(self.comboBox1, 1, 1)
+        
+        
+        # Create question box and add each loaded question into it.
+        self.comboBox2 = QComboBox(self)
+        for q in self.questions:
+            self.comboBox2.addItem(q.get_question())
+
+        self.layout.addWidget(self.comboBox2, 2, 1)
+        
+        # Create question box and add each loaded question into it.
+        self.comboBox3 = QComboBox(self)
+        for q in self.questions:
+            self.comboBox3.addItem(q.get_question())
+
+        self.layout.addWidget(self.comboBox3, 3, 1)
+        
+        
+        self.submit = QPushButton(self.parent.parent.MultiLang.find_correct_word("Submit"))
+        self.submit.clicked.connect(self.plot_state_space)
+        self.layout.addWidget(self.submit, 4, 1)
+        
+        self.show()
+        
+     def plot_state_space(self):
+        import matplotlib as mpl
+        from mpl_toolkits.mplot3d import Axes3D
+        
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+
+        a = self.parent.questions[self.comboBox1.currentIndex()].get_data()
+        b = self.parent.questions[self.comboBox2.currentIndex()].get_data()
+        c = self.parent.questions[self.comboBox3.currentIndex()].get_data()
+        ax.plot(a, b, c)
+        
+        ax.legend()
+
+        plt.show()

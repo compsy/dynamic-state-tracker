@@ -55,7 +55,7 @@ class FormWindow(QMainWindow):
         else:
             question = QLabel(text)
         field = QLineEdit(self)
-        field.setText(self.parent.MultiLang.find_correct_word("answer") + "...")
+        field.setText("")
 
         self.question_fields.append(field)
         self.number_of_fields = self.number_of_fields+1
