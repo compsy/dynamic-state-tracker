@@ -86,9 +86,9 @@ class MainWindow(QMainWindow):
         self.languageBox = QComboBox(self)
         
         self.languageBox.addItem("English")
-        self.languageBox.addItem("Dutch")
-        self.languageBox.addItem("French")
-        self.languageBox.addItem("Spanish")
+        self.languageBox.addItem("Nederlands")
+        self.languageBox.addItem("Français")
+        self.languageBox.addItem("Español")
         self.languageBox.setCurrentIndex(0)
         
         self.languageBox.move(50,280)
@@ -185,20 +185,24 @@ class MainWindow(QMainWindow):
         self.form_list = new_form_list
         
         new_questions_list = list()
-
-        f = open("saves/Questions_layout/questions.txt", "r")
-        with f:
-            data = f.read()
-            segments1 = data.split("~")
-            segments2 = segments1[0].split("//")
-            for q_text in segments2:
-                if (q_text != ""):
-                    newFormComponent = Question.Question()
-                    newFormComponent.set_question(q_text)
-                    new_questions_list.append(newFormComponent)
+        self.time = 500
+        
+        try:
+            f = open("saves/Questions_layout/questions.txt", "r")
+            with f:
+                data = f.read()
+                segments1 = data.split("~")
+                segments2 = segments1[0].split("//")
+                for q_text in segments2:
+                    if (q_text != ""):
+                        newFormComponent = Question.Question()
+                        newFormComponent.set_question(q_text)
+                        new_questions_list.append(newFormComponent)
                         
-        self.questions = new_questions_list
-        self.time = int(segments1[1])
+            self.questions = new_questions_list
+            self.time = int(segments1[1])
+        except: 
+            print("Items load failed, set to none.")
     
     
 

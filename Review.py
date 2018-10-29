@@ -306,7 +306,7 @@ class PlotCanvas(FigureCanvas):
             data = self.parent.questions[self.parent.question_index].get_data()
             ax = self.figure.add_subplot(111)
             time_str = self.parent.parent.MultiLang.find_correct_word("Time")
-            ax.set(xlabel = time_str + " (" + self.parent.time_interval + " ms)", ylabel = "Rating scale")
+            ax.set(xlabel = time_str + " (" + self.parent.time_interval + " ms)", ylabel = self.parent.parent.MultiLang.find_correct_word("Not at all to very much"))
             ax.plot(data, 'r-')
             ax.set_title(self.parent.questions[self.parent.question_index].get_question())
             

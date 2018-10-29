@@ -14,6 +14,10 @@ class MultiLanguage():
             f.close()
         except:
             self.word_array = list()
+            
+        # For seeing the words
+        #for word in self.word_array:
+        #    print(word[0] + "\n")
        
     def set_language(self, lang):
         self.cur_language = lang
@@ -41,10 +45,10 @@ class MultiLanguage():
     def find_correct_word(self, eng_word):
         if(self.cur_language == "English"):
             return eng_word
-        elif(self.cur_language == "Dutch"):
+        elif(self.cur_language == "Nederlands"):
             return self.find_dutch(eng_word)
-        elif(self.cur_language == "French"):
+        elif(self.cur_language == "Français"):
             return self.find_french(eng_word)
-        elif(self.cur_language == "Spanish"):
+        elif(self.cur_language == "Español"):
             return self.find_spanish(eng_word)    
     
