@@ -2,6 +2,7 @@ import PyQt5
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
         QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget)
 from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction, QComboBox, QGridLayout, QLineEdit, QHBoxLayout, QCheckBox
+from PyQt5.QtGui import QIcon,QFont
 import sys
 import json
 import Question
@@ -48,6 +49,16 @@ class ReviewWindow(QMainWindow):
         self.add_plot_with_best_fit()
         
         
+        # Add actions 
+        openAction = QAction(QIcon('open.png'), '&OpenMore', self)        
+        openAction.setShortcut('Ctrl+O')
+        openAction.setStatusTip('Open more')
+        openAction.triggered.connect(self.load_more_data)
+        
+        menuBar = self.menuBar()
+        fileMenu = menuBar.addMenu('&File')
+        fileMenu.addAction(openAction)
+        
     def load_file(self, file_name):
         '''
             Opens a file, then uses load_data on the read text to load questions and data into the reviewing format.
@@ -85,6 +96,41 @@ class ReviewWindow(QMainWindow):
             temp_form.set_question(partition[0])
             temp_form.set_data(partition[1])
             self.form_list.append(temp_form)
+            
+    def load_more_data(self):
+        fileName, _ = QFileDialog.getOpenFileName(self,"Open File", "saves","All Files (*);;Python Files (*.py)")
+        
+        if fileName:
+            #print(fileName)
+            f = open(fileName, 'r')
+            with f:
+                data = f.read()
+                
+            split_between_question_and_form_data = data.split("~")
+        
+            question_segments = split_between_question_and_form_data[0].split("//")
+            form_segments =  split_between_question_and_form_data[1].split("//")
+            
+            print("Base time: " + self.time_interval + ". New time: " + question_segments[1])
+            if(self.time_interval != question_segments[1]):
+                print("Different time-intervals. Failed to merge!")
+                return
+            for i in range(2, len(question_segments)-1):
+                partition = question_segments[i].split(" - ")
+                temp_data = json.loads(partition[1])
+                if(len(self.questions) > 0 and len(temp_data) != len(self.questions[0].get_data())):
+                    print("Warning: Different lengths of input. Failed to merge! Base length = " + str(len(self.questions[0].get_data())) + " and new length = " + str( len(temp_data)))
+                    
+                temp_question = Question.Question()
+                temp_question.set_question(partition[0])
+                temp_question.set_data(temp_data)
+                self.questions.append(temp_question)
+                
+                # Add to the combo box!
+                self.comboBox.addItem(partition[0])
+                
+                if(len(self.questions) > 1):
+                    self.plot_all.setEnabled(True)
  
     def add_combo_boxes(self):
         '''
@@ -174,11 +220,11 @@ class ReviewWindow(QMainWindow):
         if(len(self.questions) == 1):
             self.plot_all.setEnabled(False)
       
-        if(len(self.questions) > 2):
-            self.state_space = QPushButton("State space")
-            self.state_space.clicked.connect(self.open_state_space)
-            checkButtonLayout.addWidget(self.state_space)
-      
+    
+        self.state_space = QPushButton("State space")
+        self.state_space.clicked.connect(self.open_state_space)
+        checkButtonLayout.addWidget(self.state_space)
+
 
       
     def open_state_space(self):
@@ -217,6 +263,7 @@ class StatsWindow(QMainWindow):
         self.data_median = QLabel("0")
         self.data_mode = QLabel("0")
         self.data_range= QLabel("0")
+        self.data_standard_dev = QLabel("0")
         
         # Creates the best fit label, sets its text to the formated best fit.
         self.best_fit = QLabel(self.parent.parent.MultiLang.find_correct_word("Trend") + ": " + self.format_best_fit(best_fit))
@@ -227,6 +274,7 @@ class StatsWindow(QMainWindow):
         self.layout.addWidget(self.data_mode, 2,0)
         self.layout.addWidget(self.data_range, 3,0)      
         self.layout.addWidget(self.best_fit, 4,0)
+        self.layout.addWidget(self.data_standard_dev, 5, 0)
 
         # Update values of the averages to the set question.
         self.update_values()
@@ -242,6 +290,7 @@ class StatsWindow(QMainWindow):
         self.data_median.setText(self.parent.parent.MultiLang.find_correct_word("Median") + ": " + str(statistics.median(temp_data)))
         self.data_mode.setText(self.parent.parent.MultiLang.find_correct_word("Mode") + ": " + str(max(set(temp_data), key=temp_data.count)))
         self.data_range.setText(self.parent.parent.MultiLang.find_correct_word("Range")+ ": " + str(max(temp_data) - min(temp_data)))
+        self.data_standard_dev.setText("Standard deviation: " + str(round(np.std(temp_data), 3)))
         
     def format_best_fit(self, fit):
         '''
@@ -491,8 +540,12 @@ class StateSpaceWindow(QMainWindow):
         a = self.parent.questions[self.comboBox1.currentIndex()].get_data()
         b = self.parent.questions[self.comboBox2.currentIndex()].get_data()
         c = self.parent.questions[self.comboBox3.currentIndex()].get_data()
-        ax.plot(a, b, c)
         
-        ax.legend()
+        if(len(a) == len(b) and len(a) == len(c)):
+            ax.plot(a, b, c)
+            
+            ax.legend()
 
-        plt.show()
+            plt.show()
+        else:
+            print("Failed, different data lengths!")
