@@ -365,7 +365,7 @@ class PlotCanvas(FigureCanvas):
                 ax.grid()
         ax.set_title("All questions")
         time_str = self.parent.parent.MultiLang.find_correct_word("Time")
-        ax.set(xlabel = time_str + " (" + self.parent.time_interval + " ms)", ylabel = "Rating scale")
+        ax.set(xlabel = time_str + " (" + self.parent.time_interval + " ms)", ylabel = self.parent.parent.MultiLang.find_correct_word("Not at all to very much"))
         
         # Add legend
         ax.legend(handles = legend_list)

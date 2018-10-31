@@ -24,7 +24,9 @@ class Question():
         if len(self.data) > 0:
             return self.data[len(self.data)-1]
         return None
-
+        
+    def reset_data(self):
+        self.data = list()
 
     def get_question(self):
         return self.question

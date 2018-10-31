@@ -12,6 +12,7 @@ import threading
 import time
 import json
 import Form
+import math
 
 from pynput.mouse import Controller
 
@@ -24,6 +25,8 @@ class MediaPlayer(QMainWindow):
         super(MediaPlayer, self).__init__(parent)
         self.parent = parent
         self.questions = questions 
+        for q in self.questions:
+            q.reset_data()
         self.answered_form = answered_form
         self.time = time
         self.setWindowTitle("Dynamic State Tracker 2.0")
@@ -114,6 +117,9 @@ class MediaPlayer(QMainWindow):
         
         # Create slider and label
            
+        # Reset data in questions!
+
+
         ## ADD INPUT METHOD DEPENDING ON AMOUNT OF QUESTIONS AND TIME
         if(len(self.questions) == 1):
                 # Initalize slider, initalize type variable for later.
@@ -242,7 +248,7 @@ class MediaPlayer(QMainWindow):
         
     def format_time(self, m_seconds):
         seconds = round(m_seconds/1000)
-        mins = round(seconds / 60) 
+        mins = math.floor(seconds / 60) 
         reduced_seconds = seconds % 60
         if (reduced_seconds < 10):
             seconds_str = "0" + str(reduced_seconds)
@@ -393,6 +399,7 @@ class SaveFileWindow(QMainWindow):
                 second_text = str(q.get_data())
                 save_string = first_text + " - " + second_text
                 f.write(save_string + "//")
+             
             
             f.close()
             print("Sucessfully saved!") 
