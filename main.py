@@ -36,8 +36,7 @@ class MainWindow(QMainWindow):
         
         # Tries to load form and question formats, else it creates a new blank list.
         self.load_from_file()
-        
-        
+          
         # Add Icon 
         self.setWindowIcon(QtGui.QIcon('logo.png'))
           
@@ -49,6 +48,7 @@ class MainWindow(QMainWindow):
         self.setQuestionsButton.setText(self.MultiLang.find_correct_word("Set items"))
         self.setFormButton.setText(self.MultiLang.find_correct_word("Basic questions"))
         self.reviewButton.setText(self.MultiLang.find_correct_word("Show result"))
+        
     def initalize_tag(self):
         titleLabel = QLabel("By Oliver Holder, \nRuud den Hartigh", self)
         titleLabel.move(80,320)
@@ -212,6 +212,6 @@ class MainWindow(QMainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     mainWindow= MainWindow()
-    mainWindow.resize(200, 350)
+    mainWindow.resize(200, 360)
     mainWindow.show()
     sys.exit(app.exec_())

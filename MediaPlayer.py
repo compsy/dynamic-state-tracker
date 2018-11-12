@@ -25,12 +25,15 @@ class MediaPlayer(QMainWindow):
         super(MediaPlayer, self).__init__(parent)
         self.parent = parent
         self.questions = questions 
-        for q in self.questions:
-            q.reset_data()
         self.answered_form = answered_form
         self.time = time
         self.setWindowTitle("Dynamic State Tracker 2.0")
+
         
+        # Reset data in questions!
+        for q in self.questions:
+            q.reset_data()
+            
         # Controller component is needed to track mouse while it is not clicked.
         self.mouse = Controller()
         
@@ -99,14 +102,14 @@ class MediaPlayer(QMainWindow):
         controlLayout.addWidget(self.positionSlider)
         controlLayout.addWidget(self.positionLabel)
 
-        layout = QGridLayout()
-        layout.setRowStretch(0,2)
-        layout.setVerticalSpacing(1)
-        layout.addWidget(videoWidget,0,0)
-        layout.addLayout(controlLayout,1,0)
+        self.layout = QGridLayout()
+        self.layout.setRowStretch(0,2)
+        self.layout.setVerticalSpacing(1)
+        self.layout.addWidget(videoWidget,0,0)
+        self.layout.addLayout(controlLayout,1,0)
 
         # Set widget to contain window contents
-        wid.setLayout(layout)
+        wid.setLayout(self.layout)
 
         self.mediaPlayer.setVideoOutput(videoWidget)
         self.mediaPlayer.stateChanged.connect(self.mediaStateChanged)
@@ -114,68 +117,12 @@ class MediaPlayer(QMainWindow):
         self.mediaPlayer.durationChanged.connect(self.durationChanged)
         self.mediaPlayer.error.connect(self.handleError)
         
-        
-        # Create slider and label
-           
-        # Reset data in questions!
-
-
         ## ADD INPUT METHOD DEPENDING ON AMOUNT OF QUESTIONS AND TIME
         if(len(self.questions) == 1):
-                # Initalize slider, initalize type variable for later.
-                self.percent_text = QLabel("0")
-                self.slider = QSlider(Qt.Horizontal)
-                self.slider.setStyleSheet("QSlider::handle:horizontal {background-color: blue; border: 1px solid #777; width 13px; margin-top: -2px; margin-bottom: -2px; border-radius: 4px;}")
-                self.slider.setFocusPolicy(Qt.StrongFocus)
-                self.slider.setTickPosition(QSlider.TicksBothSides)
-                self.slider.setTickInterval(10)
-                self.slider.setSingleStep(1)      
-                self.slider.valueChanged.connect(self.value_change)
-                self.slider.setMouseTracking(True)
-                self.type = "one"
-                
-                # Creates a label with the asked question, then adds it to the main layout.
-                self.question_text = QLabel(self.questions[0].get_question())
-                newfont = QFont("Times", 20, QFont.Bold) 
-                self.question_text.setFont(newfont)
-                layout.addWidget(self.question_text,3,0, Qt.AlignCenter)
-                
-                # Labels for the extremes
-                max_label = QLabel(self.parent.MultiLang.find_correct_word("Very much"))
-                min_label = QLabel(self.parent.MultiLang.find_correct_word("Not at all"))
-                
-                newfont = QFont("Times", 16, QFont.Bold) 
-                max_label.setFont(newfont)
-                min_label.setFont(newfont)
-                
-                
-                textLayout = QHBoxLayout()
-                textLayout.setContentsMargins(0, 0, 0 ,0)
-                
-             
-                textLayout.addWidget(min_label,0, Qt.AlignLeft)
-                textLayout.addWidget(max_label,0, Qt.AlignRight)
-                
-                
-                layout.addLayout(textLayout, 5, 0)
-                
-                
-                # Create layouts to place slider inside
-                sliderLayout = QHBoxLayout()
-                sliderLayout.setContentsMargins(0, 0, 0, 0)
-                
-                # Add slider and percent text to slider layout.
-         
-       
-                sliderLayout.addWidget(self.slider)
-                sliderLayout.addWidget(self.percent_text)
-               
-                # Add slider layout to the main window layout.
-                layout.addLayout(sliderLayout,4,0)
+             self.create_single_mode()
         elif(len(self.questions) > 1):
                 # Initalize type variable for later.
-                self.type = "multi"
-        
+                self.type = "multi"    
         
         #Add timer
         self.timer = QTimer()
@@ -186,9 +133,56 @@ class MediaPlayer(QMainWindow):
         self.auto_mouse_timer.timeout.connect(self.update_mouse)
         
         # Add error label to layout
-        layout.addWidget(self.errorLabel)
+        self.layout.addWidget(self.errorLabel)
 
+    def create_single_mode(self):
+        ''' 
+            This function is called when the program is in single question mode.
+            It creates the slider, question and labels.
+            It also sets type to 'one' (this is used later for recording)
+        '''
+       # Initalize slider, initalize type variable for later.
+        self.percent_text = QLabel("0")
+        self.slider = QSlider(Qt.Horizontal)
+        self.slider.setStyleSheet("QSlider::handle:horizontal {background-color: blue; border: 1px solid #777; width 13px; margin-top: -2px; margin-bottom: -2px; border-radius: 4px;}")
+        self.slider.setFocusPolicy(Qt.StrongFocus)
+        self.slider.setTickPosition(QSlider.TicksBothSides)
+        self.slider.setTickInterval(10)
+        self.slider.setSingleStep(1)      
+        self.slider.valueChanged.connect(self.value_change)
+        self.slider.setMouseTracking(True)
+        self.type = "one"
         
+        # Creates a label with the asked question, then adds it to the main layout.
+        self.question_text = QLabel(self.questions[0].get_question())
+        newfont = QFont("Times", 20, QFont.Bold) 
+        self.question_text.setFont(newfont)
+        self.layout.addWidget(self.question_text,3,0, Qt.AlignCenter)
+        
+        # Labels for the extremes
+        max_label = QLabel(self.parent.MultiLang.find_correct_word("Very much"))
+        min_label = QLabel(self.parent.MultiLang.find_correct_word("Not at all"))
+        newfont = QFont("Times", 16, QFont.Bold) 
+        max_label.setFont(newfont)
+        min_label.setFont(newfont)
+        textLayout = QHBoxLayout()
+        textLayout.setContentsMargins(0, 0, 0 ,0)
+        textLayout.addWidget(min_label,0, Qt.AlignLeft)
+        textLayout.addWidget(max_label,0, Qt.AlignRight)
+        self.layout.addLayout(textLayout, 5, 0)
+        
+        # Create layouts to place slider inside
+        sliderLayout = QHBoxLayout()
+        sliderLayout.setContentsMargins(0, 0, 0, 0)
+        
+        # Add slider and percent text to slider layout.
+        sliderLayout.addWidget(self.slider)
+        sliderLayout.addWidget(self.percent_text)
+       
+        # Add slider layout to the main window layout.
+        self.layout.addLayout(sliderLayout,4,0)
+    
+
  
     def closeEvent(self, event):
         print ("Closing")
@@ -215,7 +209,6 @@ class MediaPlayer(QMainWindow):
         print("Exiting!")
         self.close()
 
-            
     def play(self):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
             self.mediaPlayer.pause()

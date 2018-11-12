@@ -119,7 +119,7 @@ class ReviewWindow(QMainWindow):
                 partition = question_segments[i].split(" - ")
                 temp_data = json.loads(partition[1])
                 if(len(self.questions) > 0 and len(temp_data) != len(self.questions[0].get_data())):
-                    print("Warning: Different lengths of input. Failed to merge! Base length = " + str(len(self.questions[0].get_data())) + " and new length = " + str( len(temp_data)))
+                    print("Warning: Different lengths of input. Base length = " + str(len(self.questions[0].get_data())) + " and new length = " + str( len(temp_data)))
                     
                 temp_question = Question.Question()
                 temp_question.set_question(partition[0])
@@ -540,6 +540,14 @@ class StateSpaceWindow(QMainWindow):
         a = self.parent.questions[self.comboBox1.currentIndex()].get_data()
         b = self.parent.questions[self.comboBox2.currentIndex()].get_data()
         c = self.parent.questions[self.comboBox3.currentIndex()].get_data()
+        
+        minimum = min(len(a), len(b), len(c))
+        
+        a = a[:minimum]
+        b = b[:minimum]
+        c = c[:minimum]
+        
+        ax.set(xlabel = self.parent.questions[self.comboBox1.currentIndex()].get_question(), ylabel = self.parent.questions[self.comboBox2.currentIndex()].get_question(), zlabel = self.parent.questions[self.comboBox3.currentIndex()].get_question())
         
         if(len(a) == len(b) and len(a) == len(c)):
             ax.plot(a, b, c)
