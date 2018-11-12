@@ -201,24 +201,35 @@ class ReviewWindow(QMainWindow):
 
         self.layout.addLayout(checkButtonLayout, 6, 1)
         
-        self.hide_best_fit = QCheckBox(self.parent.MultiLang.find_correct_word("No trend"))
-        self.hide_best_fit.stateChanged.connect(self.replot)
-        checkButtonLayout.addWidget(self.hide_best_fit)
+        #self.hide_best_fit = QCheckBox(self.parent.MultiLang.find_correct_word("No trend"))
+        #self.hide_best_fit.stateChanged.connect(self.replot)
+        #checkButtonLayout.addWidget(self.hide_best_fit)
         
         self.add_grid = QCheckBox(self.parent.MultiLang.find_correct_word("Grid"))
         self.add_grid.stateChanged.connect(self.replot)
         checkButtonLayout.addWidget(self.add_grid)
         
+        self.set_to_normal = QPushButton("Normal plot")
+        self.set_to_normal.clicked.connect(self.replot)
+        checkButtonLayout.addWidget(self.set_to_normal)
           
-        self.set_to_histo = QCheckBox("Histogram")
-        self.set_to_histo.stateChanged.connect(self.replot)
+        self.set_to_histo = QPushButton("Histogram")
+        self.set_to_histo.clicked.connect(self.plot.histogram)
         checkButtonLayout.addWidget(self.set_to_histo)
         
-        self.plot_all = QCheckBox("Plot all")
-        self.plot_all.stateChanged.connect(self.replot)
+        self.set_to_diff_histo = QPushButton("dx Histogram")
+        self.set_to_diff_histo.clicked.connect(self.plot.forwards_difference_histogram)
+        checkButtonLayout.addWidget(self.set_to_diff_histo)
+        
+        self.plot_all = QPushButton("Plot all")
+        self.plot_all.clicked.connect(self.plot.plot_all)
         checkButtonLayout.addWidget(self.plot_all)
         if(len(self.questions) == 1):
             self.plot_all.setEnabled(False)
+            
+        self.fourier_button = QPushButton("Fourier")
+        self.fourier_button.clicked.connect(self.plot.fourier_transform)
+        checkButtonLayout.addWidget(self.fourier_button)
       
     
         self.state_space = QPushButton("State space")
@@ -238,13 +249,7 @@ class ReviewWindow(QMainWindow):
        window = SaveExcel(self)
         
     def replot(self):
-        self.plot.clear()
-        if (self.set_to_histo.isChecked()):
-            self.plot.histogram()
-        elif (self.plot_all.isChecked()):
-            self.plot.plot_all()
-        else:
-            self.fit = self.plot.best_fit(self.comboBoxDim.currentIndex())
+        self.fit = self.plot.best_fit(self.comboBoxDim.currentIndex())
         
         
 class StatsWindow(QMainWindow):
@@ -350,7 +355,7 @@ class PlotCanvas(FigureCanvas):
             If the degree is 0, no trend line will be created. The 'fit' variable will remain as default "None".
             If the plot excepts, then it is most likely the wrong text file was loaded. This prints "Plot crashing!" and closes the review window.
         '''
-
+        self.clear()
         try:
             data = self.parent.questions[self.parent.question_index].get_data()
             ax = self.figure.add_subplot(111)
@@ -366,7 +371,7 @@ class PlotCanvas(FigureCanvas):
             t = range(1, len(data) + 1)
              
             # Create best fit, depending on dimension.
-            if(dimension != 0 and not self.parent.hide_best_fit.isChecked()):
+            if(dimension != 0):
                 
                 fit = np.poly1d(np.polyfit(t, data, dimension))
                 ax.plot(fit(t))
@@ -378,12 +383,12 @@ class PlotCanvas(FigureCanvas):
             self.draw()
             return fit
         except:
-
             print("Plot crashing!")
             self.parent.close()
             self.close()
             
     def histogram(self):
+        self.clear()
         try:
             data = self.parent.questions[self.parent.question_index].get_data()
             ax = self.figure.add_subplot(111)
@@ -392,6 +397,9 @@ class PlotCanvas(FigureCanvas):
             tick_val = [0,10,20,30,40,50,60,70,80,90,100]
             ax.set_xticks(tick_val)
             ax.set_title("Histogram:" + self.parent.questions[self.parent.question_index].get_question())
+            
+            if(self.parent.add_grid.isChecked()):
+                ax.grid()
             self.draw()
             return None
         except:
@@ -401,6 +409,7 @@ class PlotCanvas(FigureCanvas):
             
             
     def plot_all(self):
+        self.clear()
         colors = ["red", "blue", "green", "black", "purple", "yellow", "pink"]
         legend_list = list()
         i = 0
@@ -421,7 +430,35 @@ class PlotCanvas(FigureCanvas):
         #Draw graphs 
         self.draw()
         
-
+    def fourier_transform(self):
+         self.clear()
+         data = self.parent.questions[self.parent.question_index].get_data()
+         transform = np.fft.fft(data)
+         print(transform)
+         if(self.parent.add_grid.isChecked()):
+            ax.grid()
+         ax = self.figure.add_subplot(111)
+         ax.set(xlabel = "Freqency (Hz)", ylabel = "Amount")
+         ax.plot(transform)
+         self.draw()
+         
+    def forwards_difference_histogram(self):
+        self.clear()
+        data = self.parent.questions[self.parent.question_index].get_data()
+        difference_list = list()
+        for i in range (0, len(data)-1):
+            difference_list.append(abs(data[i] - data[i+1]))
+            
+        ax = self.figure.add_subplot(111)
+        ax.hist(difference_list, bins = 10)
+        ax.set(xlabel = "Forward difference", ylabel = "Amount")
+        #tick_val = [0,10,20,30,40,50,60,70,80,90,100]
+        #ax.set_xticks(tick_val)
+        ax.set_title("Histogram:" + self.parent.questions[self.parent.question_index].get_question())
+        
+        if(self.parent.add_grid.isChecked()):
+            ax.grid()
+        self.draw()
     def clear(self):
         '''
            This clears the plot from the figure.
@@ -501,6 +538,28 @@ class StateSpaceWindow(QMainWindow):
         self.setCentralWidget(self.main_widget) 
         self.main_widget.setLayout(self.layout)
         
+        # Create options
+        
+           
+        checkButtonLayout = QHBoxLayout()
+        checkButtonLayout.setContentsMargins(0, 0, 0, 0)
+        
+        self.use_best_fit = QCheckBox("Use best fit")
+        checkButtonLayout.addWidget(self.use_best_fit)
+        
+        self.dim_tag = QLabel("Dimension:")
+        self.dim = QLineEdit("3")
+        checkButtonLayout.addWidget(self.dim_tag)
+        checkButtonLayout.addWidget(self.dim)
+         
+            
+        self.iter_tag = QLabel("Iter:")
+        self.iter = QLineEdit("100")
+        checkButtonLayout.addWidget(self.iter_tag)
+        checkButtonLayout.addWidget(self.iter)
+        
+        self.layout.addLayout(checkButtonLayout, 0, 1)
+        
         # Create question box and add each loaded question into it.
         self.comboBox1 = QComboBox(self)
         for q in self.questions:
@@ -541,19 +600,42 @@ class StateSpaceWindow(QMainWindow):
         b = self.parent.questions[self.comboBox2.currentIndex()].get_data()
         c = self.parent.questions[self.comboBox3.currentIndex()].get_data()
         
-        minimum = min(len(a), len(b), len(c))
+        ax.set(xlabel = self.parent.questions[self.comboBox1.currentIndex()].get_question(), ylabel = self.parent.questions[self.comboBox2.currentIndex()].get_question(), zlabel = self.parent.questions[self.comboBox3.currentIndex()].get_question())
         
+        # Ensure all datasets are the same length!
+        minimum = min(len(a), len(b), len(c))
         a = a[:minimum]
         b = b[:minimum]
         c = c[:minimum]
         
-        ax.set(xlabel = self.parent.questions[self.comboBox1.currentIndex()].get_question(), ylabel = self.parent.questions[self.comboBox2.currentIndex()].get_question(), zlabel = self.parent.questions[self.comboBox3.currentIndex()].get_question())
         
-        if(len(a) == len(b) and len(a) == len(c)):
-            ax.plot(a, b, c)
+        
+        if (self.use_best_fit.isChecked()):
+            t = range(0, minimum)
+            a = np.poly1d(np.polyfit(t, a, int(self.dim.text())))
+            b = np.poly1d(np.polyfit(t, b, int(self.dim.text())))
+            c = np.poly1d(np.polyfit(t, c, int(self.dim.text())))
             
-            ax.legend()
+            iter = int(self.iter.text())
+            
+          
+            
+            new_a = list()
+            new_b = list()
+            new_c = list()
+            
+            for i in range(0, iter):
+                new_a.append(a(i))
+                new_b.append(b(i))
+                new_c.append(c(i))
+            
+            a = new_a
+            b = new_b
+            c = new_c
+            #print(new_a)
+        ax.plot(a, b, c)
+        
+        ax.legend()
 
-            plt.show()
-        else:
-            print("Failed, different data lengths!")
+        plt.show()
+     
