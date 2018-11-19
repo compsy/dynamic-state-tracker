@@ -217,27 +217,47 @@ class ReviewWindow(QMainWindow):
         self.set_to_histo.clicked.connect(self.plot.histogram)
         checkButtonLayout.addWidget(self.set_to_histo)
         
-        self.set_to_diff_histo = QPushButton("dx Histogram")
-        self.set_to_diff_histo.clicked.connect(self.plot.forwards_difference_histogram)
-        checkButtonLayout.addWidget(self.set_to_diff_histo)
         
         self.plot_all = QPushButton("Plot all")
         self.plot_all.clicked.connect(self.plot.plot_all)
         checkButtonLayout.addWidget(self.plot_all)
         if(len(self.questions) == 1):
             self.plot_all.setEnabled(False)
-            
+        
+        self.more_options = QPushButton("More/Less options")
+        self.more_options.clicked.connect(self.toggle_more_buttons)
+        checkButtonLayout.addWidget(self.more_options)
+              
+              
+              
+        moreButtonLayout = QHBoxLayout()
+        moreButtonLayout.setContentsMargins(0, 0, 0, 0)
+
+        self.layout.addLayout(moreButtonLayout, 7, 1)
+        
+        
+        self.set_to_diff_histo = QPushButton("dx Histogram")
+        self.set_to_diff_histo.clicked.connect(self.plot.forwards_difference_histogram)
+        moreButtonLayout.addWidget(self.set_to_diff_histo)
+        self.set_to_diff_histo.setHidden(True)
+        
+        
         self.fourier_button = QPushButton("Fourier")
         self.fourier_button.clicked.connect(self.plot.fourier_transform)
-        checkButtonLayout.addWidget(self.fourier_button)
-      
+        moreButtonLayout.addWidget(self.fourier_button)
+        self.fourier_button.setHidden(True)
     
         self.state_space = QPushButton("State space")
         self.state_space.clicked.connect(self.open_state_space)
-        checkButtonLayout.addWidget(self.state_space)
+        moreButtonLayout.addWidget(self.state_space)  
+        self.state_space.setHidden(True)
 
 
-      
+    def toggle_more_buttons(self):
+        self.set_to_diff_histo.setHidden(not self.set_to_diff_histo.isHidden())
+        self.fourier_button.setHidden(not self.fourier_button.isHidden())
+        self.state_space.setHidden(not self.state_space.isHidden())
+        
     def open_state_space(self):
         new_window = StateSpaceWindow(self)
         
@@ -434,7 +454,7 @@ class PlotCanvas(FigureCanvas):
          self.clear()
          data = self.parent.questions[self.parent.question_index].get_data()
          transform = np.fft.fft(data)
-         print(transform)
+         #print(transform)
          if(self.parent.add_grid.isChecked()):
             ax.grid()
          ax = self.figure.add_subplot(111)
@@ -442,7 +462,7 @@ class PlotCanvas(FigureCanvas):
          ax.plot(transform)
          self.draw()
          
-    def forwards_difference_histogram(self):
+    def forwards_difference_histogram(self): ## Basically calculating absolute descrete velocity and putting it into bins.
         self.clear()
         data = self.parent.questions[self.parent.question_index].get_data()
         difference_list = list()
@@ -602,19 +622,13 @@ class StateSpaceWindow(QMainWindow):
         
         ax.set(xlabel = self.parent.questions[self.comboBox1.currentIndex()].get_question(), ylabel = self.parent.questions[self.comboBox2.currentIndex()].get_question(), zlabel = self.parent.questions[self.comboBox3.currentIndex()].get_question())
         
-        # Ensure all datasets are the same length!
-        minimum = min(len(a), len(b), len(c))
-        a = a[:minimum]
-        b = b[:minimum]
-        c = c[:minimum]
-        
+     
         
         
         if (self.use_best_fit.isChecked()):
-            t = range(0, minimum)
-            a = np.poly1d(np.polyfit(t, a, int(self.dim.text())))
-            b = np.poly1d(np.polyfit(t, b, int(self.dim.text())))
-            c = np.poly1d(np.polyfit(t, c, int(self.dim.text())))
+            a = np.poly1d(np.polyfit(range(0, len(a)), a, int(self.dim.text())))
+            b = np.poly1d(np.polyfit(range(0, len(b)), b, int(self.dim.text())))
+            c = np.poly1d(np.polyfit(range(0, len(c)), c, int(self.dim.text())))
             
             iter = int(self.iter.text())
             
@@ -632,7 +646,15 @@ class StateSpaceWindow(QMainWindow):
             a = new_a
             b = new_b
             c = new_c
-            #print(new_a)
+            
+            print(a)
+        else:
+            # Ensure all datasets are the same length!
+            minimum = min(len(a), len(b), len(c))
+            a = a[:minimum]
+            b = b[:minimum]
+            c = c[:minimum]
+        
         ax.plot(a, b, c)
         
         ax.legend()
