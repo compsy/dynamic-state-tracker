@@ -11,10 +11,7 @@ class Question():
         self.min = "Not at all"
 
     def set_question(self, question_param):
-        modified = question_param.replace("-", " ")
-        modified = modified.replace("//", " ")
-        modified = modified.replace("|", "")
-        self.question = modified
+        self.question = self.convert_to_safe(question_param)
 
     def set_type(self, type_param):
         self.type = type_param
@@ -43,13 +40,18 @@ class Question():
         return self.type
         
     def set_min_max(self, min_param, max_param):
-        self.min = min_param
-        self.max = max_param
+        self.min = self.convert_to_safe(min_param)
+        self.max = self.convert_to_safe(max_param)
     
     def get_min(self):
         return self.min
-        
+
     def get_max(self):
         return self.max
     
-   
+        
+    def convert_to_safe(self, text):
+        modified = text.replace("-", " ")
+        modified = modified.replace("//", " ")
+        modified = modified.replace("|", "")
+        return modified   

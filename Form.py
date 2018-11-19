@@ -4,8 +4,7 @@ class Form():
         self.data = " "
         
     def set_question(self, question_param):
-        modified = question_param.replace("//", " ")
-        self.question = modified
+        self.question = self.convert_to_safe(question_param)
 
     def get_question(self):
         return self.question
@@ -16,3 +15,11 @@ class Form():
         
     def get_data(self):
         return self.data
+        
+    
+        
+    def convert_to_safe(self, text):
+        modified = text.replace("-", " ")
+        modified = modified.replace("//", " ")
+        modified = modified.replace("|", "")
+        return modified   
