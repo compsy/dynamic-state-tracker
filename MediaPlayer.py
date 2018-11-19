@@ -160,8 +160,11 @@ class MediaPlayer(QMainWindow):
         self.layout.addWidget(self.question_text,3,0, Qt.AlignCenter)
         
         # Labels for the extremes
-        max_label = QLabel(self.parent.MultiLang.find_correct_word("Very much"))
-        min_label = QLabel(self.parent.MultiLang.find_correct_word("Not at all"))
+        #         old                  max_label = QLabel(self.parent.MultiLang.find_correct_word("Very much"))
+        #         old                  min_label = QLabel(self.parent.MultiLang.find_correct_word("Not at all"))
+        max_label = QLabel(self.questions[0].get_max())
+        min_label = QLabel(self.questions[0].get_min())
+        
         newfont = QFont("Times", 16, QFont.Bold) 
         max_label.setFont(newfont)
         min_label.setFont(newfont)
@@ -381,7 +384,7 @@ class SaveFileWindow(QMainWindow):
             f.write(str(self.parent.time) + "//")
             
             for q in self.parent.questions:
-                save_string = q.get_question() + " - " + json.dumps(q.get_data())
+                save_string = q.get_question() + "|" + q.get_min() + "|" + q.get_max() + " - " + json.dumps(q.get_data())
                 f.write(save_string + "//")
             
             # This is the symbol that splits the object.

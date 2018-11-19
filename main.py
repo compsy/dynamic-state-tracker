@@ -128,7 +128,7 @@ class MainWindow(QMainWindow):
         try:
             f = open("saves/Questions_layout/questions.txt", "w+")
             for q in self.questions:
-                f.write(q.get_question() + "//")
+                f.write(q.get_question() + "|" + q.get_min() + "|" + q.get_max() + "//")
             f.write("~" + str(new_time))
             f.close()
             print("Sucessfully saved!")
@@ -196,14 +196,17 @@ class MainWindow(QMainWindow):
                 segments2 = segments1[0].split("//")
                 for q_text in segments2:
                     if (q_text != ""):
-                        newFormComponent = Question.Question()
-                        newFormComponent.set_question(q_text)
-                        new_questions_list.append(newFormComponent)
+                        q_split = q_text.split("|")
+                        newQuesiton = Question.Question()
+                        newQuesiton.set_question(q_split[0])
+                        newQuesiton.set_min_max(q_split[1], q_split[2])
+                        new_questions_list.append(newQuesiton)
                         
             self.questions = new_questions_list
             self.time = int(segments1[1])
         except: 
             print("Items load failed, set to none.")
+            self.questions = list()
     
     
 

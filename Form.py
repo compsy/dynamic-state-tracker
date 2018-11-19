@@ -4,7 +4,8 @@ class Form():
         self.data = " "
         
     def set_question(self, question_param):
-        self.question = question_param
+        modified = question_param.replace("//", " ")
+        self.question = modified
 
     def get_question(self):
         return self.question

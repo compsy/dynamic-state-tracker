@@ -7,9 +7,14 @@ class Question():
         self.question = "not set"
         self.type = "continuous"
         self.data = list()
+        self.max = "Very much"
+        self.min = "Not at all"
 
     def set_question(self, question_param):
-        self.question = question_param
+        modified = question_param.replace("-", " ")
+        modified = modified.replace("//", " ")
+        modified = modified.replace("|", "")
+        self.question = modified
 
     def set_type(self, type_param):
         self.type = type_param
@@ -37,5 +42,14 @@ class Question():
     def get_type(self):
         return self.type
         
+    def set_min_max(self, min_param, max_param):
+        self.min = min_param
+        self.max = max_param
+    
+    def get_min(self):
+        return self.min
+        
+    def get_max(self):
+        return self.max
     
    

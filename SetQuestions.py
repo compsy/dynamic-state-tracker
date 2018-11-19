@@ -10,7 +10,7 @@ class QuestionsWindow(QMainWindow):
     def __init__(self, parent=None, current_questions = None, current_time = None):
         super(QuestionsWindow, self).__init__(parent)
         self.parent = parent
-        self.setWindowTitle(self.parent.MultiLang.find_correct_word("Set Questions"))
+        self.setWindowTitle(self.parent.MultiLang.find_correct_word("Set items"))
         # Save parent for later use in saving questions
         
         
@@ -23,7 +23,9 @@ class QuestionsWindow(QMainWindow):
         # Initalise widget lists for fields and combo boxes.
         self.question_fields = list()
         self.combo_box_list = list()
-
+        self.question_max_fields = list()
+        self.question_min_fields = list()
+        
         # Initalise variable to store amount of fields for layout purposes (Could use length of list() but this is less confusing)
         self.number_of_fields = 0
 
@@ -37,7 +39,7 @@ class QuestionsWindow(QMainWindow):
         
         self.initalize_questions()
         self.initalize_buttons()
-        
+        self.initalize_labels()
        
         
     def initalize_buttons(self):
@@ -64,6 +66,26 @@ class QuestionsWindow(QMainWindow):
         self.layout.addWidget(self.addButton,0,0)
         self.layout.addWidget(self.removeButton,0,1)
         self.layout.addWidget(self.submitButton,0,2)
+        
+        
+ 
+    def initalize_labels(self):
+
+        # Adding of time period box.
+        time_label = QLabel(self.parent.MultiLang.find_correct_word("Time") + " (in ms):")
+        self.timeBox = QLineEdit(str(self.current_time))
+        self.layout.addWidget(time_label, 0, 3)
+        self.layout.addWidget(self.timeBox,0,4)
+
+        
+        question_name = QLabel(self.parent.MultiLang.find_correct_word("Questions"))
+        self.layout.addWidget(question_name, 1, 0)
+        
+        question_min =QLabel(self.parent.MultiLang.find_correct_word("Minimum"))
+        self.layout.addWidget(question_min, 1, 1)
+        
+        question_max = QLabel(self.parent.MultiLang.find_correct_word("Maximum"))
+        self.layout.addWidget(question_max, 1, 2)
               
     def initalize_questions(self):
         '''
@@ -72,13 +94,13 @@ class QuestionsWindow(QMainWindow):
         '''
         for q in self.questions:
             if q.get_type() == "continuous":
-                self.add_question(q.get_question(),0)
+                self.add_question(q.get_question(), q.get_min(), q.get_max() ,0)
             elif q.get_type() == "Binary":
-                self.add_question(q.get_question(),1)
+                self.add_question(q.get_question(), q.get_min(), q.get_max() ,1)
             
     
     
-    def add_question(self, text = None, type = 0):
+    def add_question(self, text = None, min = None, max = None, type = 0):
         '''
             This is a function to add questions segments to the window. It will take a text input to assign the question, or set it to "Not set" if there is no input.
             If it is adding the first field, it will add a time_period box too.
@@ -94,14 +116,20 @@ class QuestionsWindow(QMainWindow):
             field.setText(text)
         self.question_fields.append(field)
         self.number_of_fields = self.number_of_fields+1
-        self.layout.addWidget(field,self.number_of_fields,0)
+        self.layout.addWidget(field,self.number_of_fields+1,0)
         
-        # Adding of time period box. (This could be done somewhere else, this is kind of ugly.)
-        if(self.number_of_fields == 1):
-            time_label = QLabel(self.parent.MultiLang.find_correct_word("Time") + " (in ms)")
-            self.timeBox = QLineEdit(str(self.current_time))
-            self.layout.addWidget(time_label, self.number_of_fields, 2)
-            self.layout.addWidget(self.timeBox,self.number_of_fields+1,2)
+        max_field = QLineEdit(self.parent.MultiLang.find_correct_word("Very much"))
+        min_field = QLineEdit(self.parent.MultiLang.find_correct_word("Not at all"))
+        if( min ):
+            min_field.setText(min)
+        if( max ):
+            max_field.setText(max)
+
+            
+        self.layout.addWidget(min_field,self.number_of_fields+1,1)
+        self.layout.addWidget(max_field,self.number_of_fields+1,2)
+        self.question_max_fields.append(max_field)
+        self.question_min_fields.append(min_field)
 
             
         self.add_combo_box(type)
@@ -118,7 +146,7 @@ class QuestionsWindow(QMainWindow):
         comboBox.model().item(1).setEnabled(False)
         comboBox.setCurrentIndex(type)
 
-        self.layout.addWidget(comboBox, self.number_of_fields, 1)
+        self.layout.addWidget(comboBox, self.number_of_fields+1, 3)
         self.combo_box_list.append(comboBox)
         
     def remove_question(self):
@@ -134,6 +162,14 @@ class QuestionsWindow(QMainWindow):
         self.layout.removeWidget(field_to_remove)
         self.number_of_fields = self.number_of_fields-1
         
+        max_field_to_remove = self.question_max_fields.pop()
+        max_field_to_remove.deleteLater()
+        self.layout.removeWidget(max_field_to_remove)
+        
+        min_field_to_remove = self.question_min_fields.pop()
+        min_field_to_remove.deleteLater()
+        self.layout.removeWidget(min_field_to_remove)
+        
         combo_to_remove = self.combo_box_list.pop()
         self.layout.removeWidget(combo_to_remove)
         combo_to_remove.deleteLater()
@@ -147,7 +183,7 @@ class QuestionsWindow(QMainWindow):
         for i in range(0, len(self.question_fields)):
             newQuestion = Question.Question()
             newQuestion.set_question(self.question_fields[i].text())
-            
+            newQuestion.set_min_max(self.question_min_fields[i].text(), self.question_max_fields[i].text())
             string_type = self.combo_box_list[i].currentText()
             if(string_type == self.parent.MultiLang.find_correct_word("continuous") ):
                  newQuestion.set_type("continuous")

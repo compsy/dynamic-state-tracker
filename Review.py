@@ -84,10 +84,22 @@ class ReviewWindow(QMainWindow):
         self.time_interval = question_segments[1]
         for i in range(2, len(question_segments)-1):
             partition = question_segments[i].split(" - ")
+            
+            # Get data
             temp_data = json.loads(partition[1])
+           
+            # Get question and ranges
+            question_range_partition = partition[0].split("|")
             temp_question = Question.Question()
-            temp_question.set_question(partition[0])
-            temp_question.set_data(temp_data)
+            temp_question.set_question(question_range_partition[0])
+            if(len(question_range_partition) >= 3 and question_range_partition[1] != "" and question_range_partition[2] != ""):
+                temp_question.set_min_max(question_range_partition[1], question_range_partition[2])
+            else:
+                print("Ranges empty! automatically assigning them.")
+                temp_question.set_min_max(self.parent.MultiLang.find_correct_word("Very much"), self.parent.MultiLang.find_correct_word("Not at all"))
+                
+            # Assign data and save question
+            temp_question.set_data(temp_data)   
             self.questions.append(temp_question)
             
         for i in range(0, len(form_segments)-1):
@@ -121,8 +133,17 @@ class ReviewWindow(QMainWindow):
                 if(len(self.questions) > 0 and len(temp_data) != len(self.questions[0].get_data())):
                     print("Warning: Different lengths of input. Base length = " + str(len(self.questions[0].get_data())) + " and new length = " + str( len(temp_data)))
                     
+                
+                question_range_partition = partition[0].split("|")
                 temp_question = Question.Question()
-                temp_question.set_question(partition[0])
+                temp_question.set_question(question_range_partition[0])
+                if(len(question_range_partition) >= 3 and question_range_partition[1] != "" and question_range_partition[2] != ""):
+                    print("ranges correctly assigned!")
+                    temp_question.set_min_max(question_range_partition[1], question_range_partition[2])
+                else:
+                    print("ranges empty! automatically assigning them.")
+                    temp_question.set_min_max("Very much", "Not at all")
+                
                 temp_question.set_data(temp_data)
                 self.questions.append(temp_question)
                 
@@ -201,9 +222,6 @@ class ReviewWindow(QMainWindow):
 
         self.layout.addLayout(checkButtonLayout, 6, 1)
         
-        #self.hide_best_fit = QCheckBox(self.parent.MultiLang.find_correct_word("No trend"))
-        #self.hide_best_fit.stateChanged.connect(self.replot)
-        #checkButtonLayout.addWidget(self.hide_best_fit)
         
         self.add_grid = QCheckBox(self.parent.MultiLang.find_correct_word("Grid"))
         self.add_grid.stateChanged.connect(self.replot)
@@ -378,9 +396,11 @@ class PlotCanvas(FigureCanvas):
         self.clear()
         try:
             data = self.parent.questions[self.parent.question_index].get_data()
+            min_label = self.parent.questions[self.parent.question_index].get_min()
+            max_label = self.parent.questions[self.parent.question_index].get_max()
             ax = self.figure.add_subplot(111)
             time_str = self.parent.parent.MultiLang.find_correct_word("Time")
-            ax.set(xlabel = time_str + " (" + self.parent.time_interval + " ms)", ylabel = self.parent.parent.MultiLang.find_correct_word("Not at all to very much"))
+            ax.set(xlabel = time_str + " (" + self.parent.time_interval + " ms)", ylabel = min_label + "->" + max_label)
             ax.plot(data, 'r-')
             ax.set_title(self.parent.questions[self.parent.question_index].get_question())
             
