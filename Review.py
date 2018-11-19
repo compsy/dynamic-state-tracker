@@ -20,7 +20,7 @@ class ReviewWindow(QMainWindow):
     def __init__(self, parent=None, file_name=None):
         super(ReviewWindow, self).__init__(parent)
         self.parent = parent
-        self.setWindowTitle("Dynamic State Tracker 2.0: " +self.parent.MultiLang.find_correct_word("Review"))
+        self.setWindowTitle("Dynamic State Tracker 2.0: " +self.parent.MultiLang.find_correct_word("Show result"))
         self.questions = list()
         self.form_list = list()
         self.load_file(file_name)
