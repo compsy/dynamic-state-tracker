@@ -16,9 +16,10 @@ import MultiLanguage
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
+        self.setWindowTitle("DST")
         
         # Create DST title label
-        titleLabel = QLabel("DST 2.0", self)
+        titleLabel = QLabel("DST 2.3", self)
         titleLabel.move(50,25)
         titleLabel.setAlignment(PyQt5.QtCore.Qt.AlignCenter)
         

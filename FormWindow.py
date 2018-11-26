@@ -47,11 +47,8 @@ class FormWindow(QMainWindow):
         '''
         for q in self.form_list:
             self.add_answer(q.get_question(),1, q.get_data())
+
             
-                
-            
-    
-    
     def add_answer(self, text = None, type = 0, past_data = " "):
         '''
             Adds a question into the window, if there is no text provided the question is set to "Failed to load.". Also inserts an answer box for each question.
