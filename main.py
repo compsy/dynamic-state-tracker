@@ -141,7 +141,7 @@ class MainWindow(QMainWindow):
         window.show()
         
     def review(self):
-        fileName, _ = QFileDialog.getOpenFileName(self,"Open File", "saves","All Files (*);;Python Files (*.py)")
+        fileName, _ = QFileDialog.getOpenFileName(self,self.MultiLang.find_correct_word("Open File"), "saves","All Files (*);;Python Files (*.py)")
         if fileName:
             print(fileName)
             window = Review.ReviewWindow(self, fileName)

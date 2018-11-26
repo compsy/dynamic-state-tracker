@@ -1,6 +1,7 @@
 
 import json
 import jsonify
+from py_translator import Translator
 
 class MultiLanguage():
 
@@ -39,26 +40,26 @@ class MultiLanguage():
         for word in self.word_array:
             if(word[0] == eng_word):
                 return word[1]
-        return eng_word
+        return self.auto_translate(eng_word, "nl")
         
     def find_spanish(self, eng_word):
         for word in self.word_array:
             if(word[0] == eng_word):
                 return word[3]
-        return eng_word
+        return self.auto_translate(eng_word, "es")
         
     def find_french(self, eng_word):
         for word in self.word_array:
             if(word[0] == eng_word):
                 return word[2]
-        return eng_word    
+        return self.auto_translate(eng_word, "fr")  
         
     def find_german(self, eng_word):
         for word in self.word_array:
             if(word[0] == eng_word):
                
                 return word[4]
-        return eng_word     
+        return self.auto_translate(eng_word, "de")  
 
         
     def find_correct_word(self, eng_word):
@@ -73,3 +74,9 @@ class MultiLanguage():
         elif(self.cur_language == "Deutsche"):
             return self.find_german(eng_word)    
        
+       
+    def auto_translate(self, eng_word, dest):
+        translated_word = Translator().translate(text=eng_word, dest=dest).text
+        if(translated_word is None):
+            return eng_word
+        return Translator().translate(text=eng_word, dest=dest).text

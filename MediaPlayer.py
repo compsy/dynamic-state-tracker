@@ -68,19 +68,19 @@ class MediaPlayer(QMainWindow):
                 QSizePolicy.Maximum)
 
         # Create new action
-        openAction = QAction(QIcon('open.png'), '&Open', self)        
+        openAction = QAction(QIcon('open.png'),  self.parent.MultiLang.find_correct_word("Open"), self)        
         openAction.setShortcut('Ctrl+O')
         openAction.setStatusTip('Open movie')
         openAction.triggered.connect(self.openFile)
 
         # Create exit action
-        exitAction = QAction(QIcon('exit.png'), '&Exit', self)        
+        exitAction = QAction(QIcon('exit.png'),  self.parent.MultiLang.find_correct_word("Exit"), self)        
         exitAction.setShortcut('Ctrl+Q')
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(self.exitCall)
 
         # Create save action
-        saveAction = QAction(QIcon('save.png'), '&Save', self)
+        saveAction = QAction(QIcon('save.png'), self.parent.MultiLang.find_correct_word("Save"), self)
         saveAction.setShortcut('Ctrl+S')
         saveAction.triggered.connect(self.saveAndExit)
         
@@ -196,7 +196,7 @@ class MediaPlayer(QMainWindow):
         self.percent_text.setText(size)
         
     def openFile(self):
-        fileName, _ = QFileDialog.getOpenFileName(self, "Open Movie",
+        fileName, _ = QFileDialog.getOpenFileName(self, self.parent.MultiLang.find_correct_word("Open Movie"),
                 QDir.homePath())
 
         if fileName != '':

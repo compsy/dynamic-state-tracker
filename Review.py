@@ -227,22 +227,22 @@ class ReviewWindow(QMainWindow):
         self.add_grid.stateChanged.connect(self.replot)
         checkButtonLayout.addWidget(self.add_grid)
         
-        self.set_to_normal = QPushButton("Normal plot")
+        self.set_to_normal = QPushButton(self.parent.MultiLang.find_correct_word("Normal plot"))
         self.set_to_normal.clicked.connect(self.replot)
         checkButtonLayout.addWidget(self.set_to_normal)
           
-        self.set_to_histo = QPushButton("Histogram")
+        self.set_to_histo = QPushButton(self.parent.MultiLang.find_correct_word("Histogram"))
         self.set_to_histo.clicked.connect(self.plot.histogram)
         checkButtonLayout.addWidget(self.set_to_histo)
         
         
-        self.plot_all = QPushButton("Plot all")
+        self.plot_all = QPushButton(self.parent.MultiLang.find_correct_word("Plot all"))
         self.plot_all.clicked.connect(self.plot.plot_all)
         checkButtonLayout.addWidget(self.plot_all)
         if(len(self.questions) == 1):
             self.plot_all.setEnabled(False)
         
-        self.more_options = QPushButton("More/Less options")
+        self.more_options = QPushButton(self.parent.MultiLang.find_correct_word("More/Less options"))
         self.more_options.clicked.connect(self.toggle_more_buttons)
         checkButtonLayout.addWidget(self.more_options)
               
@@ -254,7 +254,7 @@ class ReviewWindow(QMainWindow):
         self.layout.addLayout(moreButtonLayout, 7, 1)
         
         
-        self.set_to_diff_histo = QPushButton("dx Histogram")
+        self.set_to_diff_histo = QPushButton(self.parent.MultiLang.find_correct_word("Difference Histogram"))
         self.set_to_diff_histo.clicked.connect(self.plot.forwards_difference_histogram)
         moreButtonLayout.addWidget(self.set_to_diff_histo)
         self.set_to_diff_histo.setHidden(True)
@@ -333,7 +333,7 @@ class StatsWindow(QMainWindow):
         self.data_median.setText(self.parent.parent.MultiLang.find_correct_word("Median") + ": " + str(statistics.median(temp_data)))
         self.data_mode.setText(self.parent.parent.MultiLang.find_correct_word("Mode") + ": " + str(max(set(temp_data), key=temp_data.count)))
         self.data_range.setText(self.parent.parent.MultiLang.find_correct_word("Range")+ ": " + str(max(temp_data) - min(temp_data)))
-        self.data_standard_dev.setText("Standard deviation: " + str(round(np.std(temp_data), 3)))
+        self.data_standard_dev.setText(self.parent.parent.MultiLang.find_correct_word("Standard deviation: ") + str(round(np.std(temp_data), 3)))
         
     def format_best_fit(self, fit):
         '''
@@ -581,7 +581,7 @@ class SaveExcel(QMainWindow):
 class StateSpaceWindow(QMainWindow):
      def __init__(self, parent=None):
         super(StateSpaceWindow, self).__init__(parent)
-        self.setWindowTitle("Choose data to create state space")
+        self.setWindowTitle(parent.parent.MultiLang.find_correct_word("Choose data to create state space"))
         self.parent = parent
         self.questions = parent.questions
         self.layout = QGridLayout()
@@ -593,7 +593,7 @@ class StateSpaceWindow(QMainWindow):
         checkButtonLayout = QHBoxLayout()
         checkButtonLayout.setContentsMargins(0, 0, 0, 0)
         
-        self.use_best_fit = QCheckBox("Use best fit")
+        self.use_best_fit = QCheckBox(self.parent.parent.MultiLang.find_correct_word("Use best fit"))
         checkButtonLayout.addWidget(self.use_best_fit)
         
         self.dim_tag = QLabel("Dimension:")
