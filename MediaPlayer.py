@@ -4,7 +4,7 @@ from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
         QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget)
-from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction, QGridLayout, QLineEdit
+from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction, QGridLayout, QLineEdit, QMessageBox
 from PyQt5.QtGui import QIcon,QFont
 
 import sys
@@ -13,6 +13,7 @@ import time
 import json
 import Form
 import math
+from os import listdir
 
 from pynput.mouse import Controller
 
@@ -187,8 +188,10 @@ class MediaPlayer(QMainWindow):
  
     def closeEvent(self, event):
         print ("Closing")
-        self.timer.stop()
-        self.auto_mouse_timer.stop()
+        if self.timer.isActive():
+            self.timer.stop()
+        if self.auto_mouse_timer.isActive():
+            self.auto_mouse_timer.stop()
         self.close()
         
     def value_change(self):
@@ -356,17 +359,17 @@ class MultiQuestionPopUP(QMainWindow):
 class SaveFileWindow(QMainWindow):
      def __init__(self, parent=None):
         super(SaveFileWindow, self).__init__(parent)
-        self.setWindowTitle("Save file as:")
+        self.setWindowTitle(parent.parent.MultiLang.find_correct_word("Save file as:"))
         self.parent = parent
         self.layout = QGridLayout()
         self.main_widget = QWidget()
         self.setCentralWidget(self.main_widget) 
         self.main_widget.setLayout(self.layout)
         
-        self.file_name_box = QLineEdit("File name here")
+        self.file_name_box = QLineEdit( self.parent.parent.MultiLang.find_correct_word("File name here"))
         self.layout.addWidget(self.file_name_box, 0, 0)
         
-        self.save_button = QPushButton("Save file")
+        self.save_button = QPushButton( self.parent.parent.MultiLang.find_correct_word("Save file"))
         self.save_button.clicked.connect(self.save_file)
         self.layout.addWidget(self.save_button, 0, 1)
         
@@ -382,7 +385,15 @@ class SaveFileWindow(QMainWindow):
         # If there is no filename, then do nothing.
         if (file_name == ""):
             return 
-        
+            
+        for name in listdir("saves/"):
+            if name == (file_name + ".txt") :
+                buttonReply = QMessageBox.question(self, 'Attempted Overwrite', self.parent.parent.MultiLang.find_correct_word("Are you sure you want to overwrite") + " [" + file_name + "]", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                if buttonReply == QMessageBox.No:
+                    return
+            
+            
+            
         try:
             f = open("saves/" + file_name + ".txt", "w+")
             f.write(self.parent.video_dir + "//")
@@ -412,7 +423,7 @@ class SaveFileWindow(QMainWindow):
 class EndWindow(QMainWindow):
     def __init__(self, parent = None, text = None):
         super(EndWindow, self).__init__(parent)
-        self.setWindowTitle("Exit window")
+        self.setWindowTitle(parent.parent.parent.MultiLang.find_correct_word("Exit window"))
         self.parent = parent
         self.layout = QGridLayout()
         self.main_widget = QWidget()
@@ -420,7 +431,7 @@ class EndWindow(QMainWindow):
         self.main_widget.setLayout(self.layout)
         
         self.label = QLabel(text)
-        self.accept_button = QPushButton("Finish")
+        self.accept_button = QPushButton(self.parent.parent.parent.MultiLang.find_correct_word("Finish"))
         self.accept_button.clicked.connect(self.accept)
         
         self.layout.addWidget(self.label, 0, 0)
