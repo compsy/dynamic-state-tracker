@@ -21,7 +21,7 @@ class ReviewWindow(QMainWindow):
     def __init__(self, parent=None, file_name=None):
         super(ReviewWindow, self).__init__(parent)
         self.parent = parent
-        self.setWindowTitle("Dynamic State Tracker 2.0: " +self.parent.MultiLang.find_correct_word("Show result"))
+        self.setWindowTitle("Dynamic State Tracker" +  parent.version + " :" +self.parent.MultiLang.find_correct_word("Show result"))
         self.questions = list()
         self.form_list = list()
         self.load_file(file_name)
@@ -32,7 +32,7 @@ class ReviewWindow(QMainWindow):
         self.main_widget.setLayout(self.layout)
         
         # Create DST title label
-        titleLabel = QLabel("DST 2.0 : " +self.parent.MultiLang.find_correct_word("Show result"), self)
+        titleLabel = QLabel("DST "  +  parent.version + " :"+self.parent.MultiLang.find_correct_word("Show result"), self)
         self.layout.addWidget(titleLabel, 0, 1)
 
         # Initalize plot.

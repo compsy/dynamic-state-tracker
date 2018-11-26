@@ -18,8 +18,10 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__(parent)
         self.setWindowTitle("DST")
         
+        self.version = "2.3"
+        
         # Create DST title label
-        titleLabel = QLabel("DST 2.3", self)
+        titleLabel = QLabel("DST " + self.version, self)
         titleLabel.move(50,25)
         titleLabel.setAlignment(PyQt5.QtCore.Qt.AlignCenter)
         

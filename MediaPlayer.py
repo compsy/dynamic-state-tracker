@@ -28,7 +28,7 @@ class MediaPlayer(QMainWindow):
         self.questions = questions 
         self.answered_form = answered_form
         self.time = time
-        self.setWindowTitle("Dynamic State Tracker 2.0")
+        self.setWindowTitle("Dynamic State Tracker "  +  parent.version)
 
         
         # Reset data in questions!
