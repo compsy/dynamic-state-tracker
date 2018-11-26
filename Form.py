@@ -15,9 +15,7 @@ class Form():
         
     def get_data(self):
         return self.data
-        
-    
-        
+          
     def convert_to_safe(self, text):
         modified = text.replace("-", " ")
         modified = modified.replace("//", " ")

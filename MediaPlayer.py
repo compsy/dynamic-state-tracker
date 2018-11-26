@@ -160,8 +160,6 @@ class MediaPlayer(QMainWindow):
         self.layout.addWidget(self.question_text,3,0, Qt.AlignCenter)
         
         # Labels for the extremes
-        #         old                  max_label = QLabel(self.parent.MultiLang.find_correct_word("Very much"))
-        #         old                  min_label = QLabel(self.parent.MultiLang.find_correct_word("Not at all"))
         max_label = QLabel(self.questions[0].get_max())
         min_label = QLabel(self.questions[0].get_min())
         
@@ -294,7 +292,7 @@ class MediaPlayer(QMainWindow):
 class MultiQuestionPopUP(QMainWindow):
     def __init__(self, parent=None):
         super(MultiQuestionPopUP, self).__init__(parent)
-        self.setWindowTitle("Questions")
+        self.setWindowTitle(parent.parent.MultiLang.find_correct_word("Questions"))
         self.parent = parent
         self.layout = QGridLayout()
         self.main_widget = QWidget()
@@ -330,9 +328,16 @@ class MultiQuestionPopUP(QMainWindow):
             last_value = q.last_value()
             if (last_value != None):     
                 slider.setValue(last_value)
+            
+            
+            min_label = QLabel(q.get_min())
+            max_label = QLabel(q.get_max())
 
-            self.layout.addWidget(question,index,0)
-            self.layout.addWidget(slider, index+1, 0)
+            self.layout.addWidget(question,index,1)
+            self.layout.addWidget(slider, index+1, 1)
+            
+            self.layout.addWidget(min_label, index+1, 0)
+            self.layout.addWidget(max_label, index+1, 2)
             
             index = index + 2
     def submit(self):

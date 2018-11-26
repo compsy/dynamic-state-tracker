@@ -12,7 +12,6 @@ class MultiLanguage():
             f = open("saves/Languages/Languages.txt", "r")
             data = f.read()
             data = data.replace('\n', '')
-            #print(data)
             self.word_array = json.loads(data)
             f.close()
         except:

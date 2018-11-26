@@ -16,6 +16,7 @@ import numpy as np
 import statistics
 import MultiLanguage
 
+
 class ReviewWindow(QMainWindow):
     def __init__(self, parent=None, file_name=None):
         super(ReviewWindow, self).__init__(parent)
@@ -113,7 +114,6 @@ class ReviewWindow(QMainWindow):
         fileName, _ = QFileDialog.getOpenFileName(self,"Open File", "saves","All Files (*);;Python Files (*.py)")
         
         if fileName:
-            #print(fileName)
             f = open(fileName, 'r')
             with f:
                 data = f.read()
@@ -428,6 +428,11 @@ class PlotCanvas(FigureCanvas):
             self.close()
             
     def histogram(self):
+        '''
+            Sets the figure in PlotCanvas. Creates a histogram using the question selected.
+            Ten bins are created from 0-10, .. , 90-100.
+            If the plot excepts, then it is most likely the wrong text file was loaded. This prints "Plot crashing!" and closes the review window.
+        '''
         self.clear()
         try:
             data = self.parent.questions[self.parent.question_index].get_data()
@@ -449,8 +454,12 @@ class PlotCanvas(FigureCanvas):
             
             
     def plot_all(self):
+        '''
+            Sets the figure in PlotCanvas. Creates a graph containing all loaded data together.
+            If the plot excepts, then it is most likely the wrong text file was loaded. This prints "Plot crashing!" and closes the review window.
+        '''
         self.clear()
-        colors = ["red", "blue", "green", "black", "purple", "yellow", "pink"]
+        colors = ["red", "blue", "green", "black", "purple", "yellow", "pink", "black", "white"]
         legend_list = list()
         i = 0
         for question in self.parent.questions:
@@ -465,22 +474,24 @@ class PlotCanvas(FigureCanvas):
         time_str = self.parent.parent.MultiLang.find_correct_word("Time")
         ax.set(xlabel = time_str + " (" + self.parent.time_interval + " ms)", ylabel = self.parent.parent.MultiLang.find_correct_word("Not at all to very much"))
         
-        # Add legend
         ax.legend(handles = legend_list)
-        #Draw graphs 
         self.draw()
         
     def fourier_transform(self):
-         self.clear()
-         data = self.parent.questions[self.parent.question_index].get_data()
-         transform = np.fft.fft(data)
-         #print(transform)
-         if(self.parent.add_grid.isChecked()):
-            ax.grid()
-         ax = self.figure.add_subplot(111)
-         ax.set(xlabel = "Freqency (Hz)", ylabel = "Amount")
-         ax.plot(transform)
-         self.draw()
+        '''
+            Sets the figure in PlotCanvas. Creates a fourier transform of the question selected.
+            If the plot excepts, then it is most likely the wrong text file was loaded. This prints "Plot crashing!" and closes the review window.
+        '''
+        self.clear()
+        data = self.parent.questions[self.parent.question_index].get_data()
+        transform = np.fft.fft(data)
+        #print(transform)
+        if(self.parent.add_grid.isChecked()):
+           ax.grid()
+        ax = self.figure.add_subplot(111)
+        ax.set(xlabel = "Freqency (Hz)", ylabel = "Amount")
+        ax.plot(transform)
+        self.draw()
          
     def forwards_difference_histogram(self): ## Basically calculating absolute descrete velocity and putting it into bins.
         self.clear()
@@ -570,7 +581,7 @@ class SaveExcel(QMainWindow):
 class StateSpaceWindow(QMainWindow):
      def __init__(self, parent=None):
         super(StateSpaceWindow, self).__init__(parent)
-        self.setWindowTitle("Chose data to create state space")
+        self.setWindowTitle("Choose data to create state space")
         self.parent = parent
         self.questions = parent.questions
         self.layout = QGridLayout()
@@ -579,8 +590,6 @@ class StateSpaceWindow(QMainWindow):
         self.main_widget.setLayout(self.layout)
         
         # Create options
-        
-           
         checkButtonLayout = QHBoxLayout()
         checkButtonLayout.setContentsMargins(0, 0, 0, 0)
         
@@ -591,8 +600,7 @@ class StateSpaceWindow(QMainWindow):
         self.dim = QLineEdit("3")
         checkButtonLayout.addWidget(self.dim_tag)
         checkButtonLayout.addWidget(self.dim)
-         
-            
+                     
         self.iter_tag = QLabel("Iter:")
         self.iter = QLineEdit("100")
         checkButtonLayout.addWidget(self.iter_tag)
@@ -642,17 +650,11 @@ class StateSpaceWindow(QMainWindow):
         
         ax.set(xlabel = self.parent.questions[self.comboBox1.currentIndex()].get_question(), ylabel = self.parent.questions[self.comboBox2.currentIndex()].get_question(), zlabel = self.parent.questions[self.comboBox3.currentIndex()].get_question())
         
-     
-        
-        
         if (self.use_best_fit.isChecked()):
             a = np.poly1d(np.polyfit(range(0, len(a)), a, int(self.dim.text())))
             b = np.poly1d(np.polyfit(range(0, len(b)), b, int(self.dim.text())))
             c = np.poly1d(np.polyfit(range(0, len(c)), c, int(self.dim.text())))
-            
             iter = int(self.iter.text())
-            
-          
             
             new_a = list()
             new_b = list()
@@ -681,3 +683,8 @@ class StateSpaceWindow(QMainWindow):
 
         plt.show()
      
+
+        
+        
+        
+        
