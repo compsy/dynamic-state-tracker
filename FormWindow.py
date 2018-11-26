@@ -1,7 +1,7 @@
 import PyQt5 
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
         QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget, QButtonGroup)
-from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction, QLineEdit, QGridLayout, QComboBox
+from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction, QLineEdit, QGridLayout, QComboBox, QCheckBox
 import sys
 import MediaPlayer
 import Form
@@ -35,18 +35,24 @@ class FormWindow(QMainWindow):
         self.submitButton.setEnabled(True)
         self.submitButton.clicked.connect(self.submit_form)
 
-        self.layout.addWidget(self.submitButton,0,0)
+        self.layout.addWidget(self.submitButton,0,1)
+        
+        self.remember = QCheckBox("Remember me")
+        self.layout.addWidget(self.remember, 0 , 0)
+        self.remember.toggle()
         
     def initalize_questions(self):
         '''
             For every questions in the form, add an answer field.
         '''
         for q in self.form_list:
-            self.add_answer(q.get_question(),1)
+            self.add_answer(q.get_question(),1, q.get_data())
+            
+                
             
     
     
-    def add_answer(self, text = None, type = 0):
+    def add_answer(self, text = None, type = 0, past_data = " "):
         '''
             Adds a question into the window, if there is no text provided the question is set to "Failed to load.". Also inserts an answer box for each question.
         '''
@@ -55,7 +61,7 @@ class FormWindow(QMainWindow):
         else:
             question = QLabel(text)
         field = QLineEdit(self)
-        field.setText("")
+        field.setText(past_data)
 
         self.question_fields.append(field)
         self.number_of_fields = self.number_of_fields+1
@@ -67,6 +73,12 @@ class FormWindow(QMainWindow):
         '''
             Opens the player and sends it the answered questions as a list.
         '''
+        if self.remember.isChecked():
+            for i in range(0, len(self.question_fields)):
+                self.form_list[i].set_data(self.question_fields[i].text())
+        else:
+            for i in range(0, len(self.question_fields)):
+                self.form_list[i].set_data(" ")
         self.answered_form = list()
         for i in range(0, len(self.question_fields)):
             newFormComponent = Form.Form()

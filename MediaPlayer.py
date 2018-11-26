@@ -192,7 +192,7 @@ class MediaPlayer(QMainWindow):
             self.timer.stop()
         if self.auto_mouse_timer.isActive():
             self.auto_mouse_timer.stop()
-        self.close()
+        #self.close()
         
     def value_change(self):
         size = str(self.slider.value())
