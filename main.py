@@ -19,6 +19,8 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("DST")
         
         self.version = "2.3"
+        print("Application starting... this may take a few seconds")
+        
         
         # Create DST title label
         titleLabel = QLabel("DST " + self.version, self)

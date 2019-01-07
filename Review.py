@@ -1,7 +1,7 @@
 import PyQt5 
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
         QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget)
-from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction, QComboBox, QGridLayout, QLineEdit, QHBoxLayout, QCheckBox
+from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction, QComboBox, QGridLayout, QLineEdit, QHBoxLayout, QCheckBox, QMessageBox
 from PyQt5.QtGui import QIcon,QFont
 import sys
 import json
@@ -17,15 +17,20 @@ import statistics
 import MultiLanguage
 
 
+import warnings
+import matplotlib.cbook
+warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
+
 class ReviewWindow(QMainWindow):
     def __init__(self, parent=None, file_name=None):
         super(ReviewWindow, self).__init__(parent)
         self.parent = parent
-        self.setWindowTitle("Dynamic State Tracker" +  parent.version + " :" +self.parent.MultiLang.find_correct_word("Show result"))
+        self.setWindowTitle("Dynamic State Tracker " +  parent.version + " :" +self.parent.MultiLang.find_correct_word("Show result"))
         self.questions = list()
         self.form_list = list()
         self.load_file(file_name)
         
+        # Set layout and main widget.
         self.layout = QGridLayout()
         self.main_widget = QWidget()
         self.setCentralWidget(self.main_widget) 
@@ -48,7 +53,6 @@ class ReviewWindow(QMainWindow):
         # Add the plot to the window.
         self.add_other_buttons()
         self.add_plot_with_best_fit()
-        
         
         # Add actions 
         openAction = QAction(QIcon('open.png'), '&OpenMore', self)        
@@ -111,6 +115,11 @@ class ReviewWindow(QMainWindow):
             self.form_list.append(temp_form)
             
     def load_more_data(self):
+        '''
+            Loads more data after the inital loading. Will fail if two different samples have different time_intervals (sampling rates). 
+            Differnt time lengths is allowed, but not recommended for processes like state space analysis.
+            This is a lot of repetition with load_data, in the future I might try to combine the two.
+        '''
         fileName, _ = QFileDialog.getOpenFileName(self,"Open File", "saves","All Files (*);;Python Files (*.py)")
         
         if fileName:
@@ -126,12 +135,14 @@ class ReviewWindow(QMainWindow):
             print("Base time: " + self.time_interval + ". New time: " + question_segments[1])
             if(self.time_interval != question_segments[1]):
                 print("Different time-intervals. Failed to merge!")
+                QMessageBox.about(self, "Failed", "Import failed because time-intervals are different.")
                 return
             for i in range(2, len(question_segments)-1):
                 partition = question_segments[i].split(" - ")
                 temp_data = json.loads(partition[1])
                 if(len(self.questions) > 0 and len(temp_data) != len(self.questions[0].get_data())):
                     print("Warning: Different lengths of input. Base length = " + str(len(self.questions[0].get_data())) + " and new length = " + str( len(temp_data)))
+                    QMessageBox.about(self, "Warning", "Different lengths of input. Take care if using state space.")
                     
                 
                 question_range_partition = partition[0].split("|")
@@ -173,8 +184,6 @@ class ReviewWindow(QMainWindow):
         self.comboBoxDim.addItem(self.parent.MultiLang.find_correct_word("Trend") +f' (x\N{SUPERSCRIPT THREE})') 
         self.comboBoxDim.addItem(self.parent.MultiLang.find_correct_word("Trend") +f' (x\N{SUPERSCRIPT FOUR})')     
 
-        
-         
         # Set default to 3. A cubic.
         self.comboBoxDim.setCurrentIndex(3)
         self.comboBoxDim.activated.connect(self.set_dimension)
@@ -472,7 +481,7 @@ class PlotCanvas(FigureCanvas):
                 ax.grid()
         ax.set_title("All questions")
         time_str = self.parent.parent.MultiLang.find_correct_word("Time")
-        ax.set(xlabel = time_str + " (" + self.parent.time_interval + " ms)", ylabel = self.parent.parent.MultiLang.find_correct_word("Not at all to very much"))
+        ax.set(xlabel = time_str + " (" + self.parent.time_interval + " ms)", ylabel = self.parent.parent.MultiLang.find_correct_word("0 - 100"))
         
         ax.legend(handles = legend_list)
         self.draw()

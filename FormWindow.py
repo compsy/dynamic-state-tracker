@@ -37,7 +37,7 @@ class FormWindow(QMainWindow):
 
         self.layout.addWidget(self.submitButton,0,1)
         
-        self.remember = QCheckBox("Remember me")
+        self.remember = QCheckBox(self.parent.MultiLang.find_correct_word("Remember me"))
         self.layout.addWidget(self.remember, 0 , 0)
         self.remember.toggle()
         

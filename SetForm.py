@@ -11,7 +11,7 @@ class SetFormWindow(QMainWindow):
     def __init__(self, parent=None, form_list = None):
         super(SetFormWindow, self).__init__(parent)
         self.parent = parent
-        self.setWindowTitle(self.parent.MultiLang.find_correct_word("Set Form"))
+        self.setWindowTitle(self.parent.MultiLang.find_correct_word("Set form"))
         
         self.video_dir = None
         self.form_list = form_list

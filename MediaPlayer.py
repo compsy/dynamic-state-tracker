@@ -244,9 +244,13 @@ class MediaPlayer(QMainWindow):
 
         
     def format_time(self, m_seconds):
+        '''
+            Format time from milli seconds to (mins:seconds).
+        '''
         seconds = round(m_seconds/1000)
         mins = math.floor(seconds / 60) 
         reduced_seconds = seconds % 60
+        # Add 0 before second digit if it is less than 10.
         if (reduced_seconds < 10):
             seconds_str = "0" + str(reduced_seconds)
         else:
@@ -266,6 +270,9 @@ class MediaPlayer(QMainWindow):
         self.errorLabel.setText("Error: " + self.mediaPlayer.errorString())
 
     def update_mouse(self):
+        '''
+            Updates the position of slider based on the position of mouse across the window.
+        '''
         if self.type == "one":
             size_x = self.slider.geometry().width()
             new_value = int(100*self.mouse.position[0]/size_x)
