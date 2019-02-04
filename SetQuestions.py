@@ -111,7 +111,7 @@ class QuestionsWindow(QMainWindow):
         
         field = QLineEdit(self)
         if(not text):
-            field.setText("Not set")
+            field.setText("-")
         else:
             field.setText(text)
         self.question_fields.append(field)

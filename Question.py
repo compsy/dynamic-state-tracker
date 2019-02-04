@@ -4,7 +4,7 @@
 class Question():
 
     def __init__(self):
-        self.question = "not set"
+        self.question = "-"
         self.type = "continuous"
         self.data = list()
         self.max = "Very much"

@@ -55,9 +55,9 @@ class ReviewWindow(QMainWindow):
         self.add_plot_with_best_fit()
         
         # Add actions 
-        openAction = QAction(QIcon('open.png'), '&OpenMore', self)        
+        openAction = QAction(QIcon('open.png'), self.parent.MultiLang.find_correct_word("Open"), self)        
         openAction.setShortcut('Ctrl+O')
-        openAction.setStatusTip('Open more')
+        openAction.setStatusTip(self.parent.MultiLang.find_correct_word("Open"))
         openAction.triggered.connect(self.load_more_data)
         
         menuBar = self.menuBar()
@@ -499,7 +499,7 @@ class PlotCanvas(FigureCanvas):
            ax.grid()
         ax = self.figure.add_subplot(111)
         ax.set(xlabel = "Freqency (Hz)", ylabel = "Amount")
-        ax.plot(transform)
+        ax.plot(np.real(transform))
         self.draw()
          
     def forwards_difference_histogram(self): ## Basically calculating absolute descrete velocity and putting it into bins.
@@ -678,7 +678,7 @@ class StateSpaceWindow(QMainWindow):
             b = new_b
             c = new_c
             
-            print(a)
+            #print(a)
         else:
             # Ensure all datasets are the same length!
             minimum = min(len(a), len(b), len(c))
@@ -686,9 +686,11 @@ class StateSpaceWindow(QMainWindow):
             b = b[:minimum]
             c = c[:minimum]
         
+        
+        
         ax.plot(a, b, c)
         
-        ax.legend()
+        #ax.legend()
 
         plt.show()
      
