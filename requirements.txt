@@ -6,7 +6,7 @@ idna==2.7
 jsonify==0.5
 kiwisolver==1.0.1
 langdetect==1.0.7
-lxml==4.2.5
+lxml==4.9.1
 matplotlib==3.0.0
 numpy==1.15.2
 py-translator==1.8.9
